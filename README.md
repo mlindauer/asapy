@@ -1,2 +1,3 @@
-# asapy
+# ASAPy
+
 Algorithm Selection Analyzer 
