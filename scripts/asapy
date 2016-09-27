@@ -35,6 +35,8 @@ optional.add_argument("--verbose", choices=["INFO", "DEBUG"], default="INFO", he
 
 args_ = parser.parse_args()
 
+logging.basicConfig(level=args_.verbose)
+
 asapy = ASAPy(output_dn=args_.output)
 
 if args_.scenario:

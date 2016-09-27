@@ -1,11 +1,20 @@
 import argparse
 import logging
 import sys
+import os
 from collections import namedtuple
 
+import numpy as np
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+from plottingscripts.plotting.scatter import plot_scatter_plot
 
 from autofolio.data.aslib_scenario import ASlibScenario 
-from dask.dataframe.io import csv_defaults
+
+from asapy.perf_analysis.perf_analysis import PerformanceAnalysis
 
 __author__ = "Marius Lindauer"
 __copyright__ = "Copyright 2016, ML4AAD"
@@ -24,6 +33,7 @@ class ASAPy(object):
         output_dn:str
             output directory name
         '''
+        self.logger = logging.getLogger("ASAPy")
         
         self.scenario = None
         self.output_dn = output_dn
@@ -62,18 +72,16 @@ class ASAPy(object):
         '''
         
         if self.scenario is None:
-            raise ValueError("Please first read in Scenario data")
+            raise ValueError("Please first read in Scenario data; use scenario input or csv input")
         
+        pa = PerformanceAnalysis(output_dn=self.output_dn,
+                            scenario=self.scenario)
+        # generate scatter plots
+        scatter_plots = pa.scatter_plots()
         
+        # generate correlation plot
+        correlation_plot = pa.correlation_plot()
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        # get shapley values
+        df_contributions = pa.get_contribution_values()
         

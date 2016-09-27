@@ -1,2 +1,3 @@
+scipy
 git+https://github.com/mlindauer/AutoFolio
 git+https://bitbucket.org/aadfreiburg/plotting_scripts.git
