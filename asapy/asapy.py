@@ -85,3 +85,12 @@ class ASAPy(object):
         # get shapley values
         df_contributions = pa.get_contribution_values()
         
+        # get cdf plot
+        cdf_plot = pa.get_cdf_plots()
+        
+        # get violin plot
+        violion_plot = pa.get_violin_plots()
+        
+        # get box plot
+        box_plot = pa.get_box_plots()
+        

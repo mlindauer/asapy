@@ -73,7 +73,7 @@ class PerformanceAnalysis(object):
                                   labels=[algo_1,algo_2],
                                   metric=self.scenario.performance_type[0])
                 out_name = os.path.join(self.output_dn, 
-                                         "scatter_%s_%s.pdf" % (algo_1.replace("/","_"),algo_2.replace("/","_")))
+                                         "scatter_%s_%s.png" % (algo_1.replace("/","_"),algo_2.replace("/","_")))
                 fig.savefig(out_name)
                 plots.append(out_name)
                 
@@ -142,8 +142,8 @@ class PerformanceAnalysis(object):
         plt.setp(labels, rotation=0, fontsize=12)
         plt.tight_layout()
         
-        out_plot = os.path.join(self.output_dn, "correlation_plot.pdf")
-        plt.savefig(out_plot, format="pdf")
+        out_plot = os.path.join(self.output_dn, "correlation_plot.png")
+        plt.savefig(out_plot, format="png")
         
         return out_plot
     
@@ -155,6 +155,9 @@ class PerformanceAnalysis(object):
             ------
             pandas.DataFrame() with columns being "Average Performance", "Marginal Performance", "Shapley Values" and indexes being the algorithms
         '''
+        
+        self.logger.info("Get contribution scores........")
+        
         algorithms = self.scenario.algorithms
         instances = self.scenario.instances
         scenario = self.scenario
@@ -276,4 +279,136 @@ class PerformanceAnalysis(object):
                         shapleys[jalgorithm] += neg_shap
     
         return shapleys
+    
+    def get_cdf_plots(self):
+        '''
+            plot the cummulative distribution function of each algorithm
+            
+            Returns
+            -------
+            file name of saved plot
+        '''
+        
+        self.logger.info("Plotting CDF plots........")
+        
+        #user_fontsize=20
+        #font = {'size'   : user_fontsize}
+        #matplotlib.rc('font', **font)
+        
+        from cycler import cycler
+        
+        gs = matplotlib.gridspec.GridSpec(1, 1)
+        
+        fig = plt.figure()
+        ax1 = plt.subplot(gs[0:1, :])
+        
+        colormap = plt.cm.gist_ncar
+        fig.gca().set_prop_cycle(cycler('color', [colormap(i) for i in np.linspace(0, 0.9, len(self.scenario.algorithms))]))
+        
+        if self.scenario.performance_type[0] == "runtime":
+            max_val = self.scenario.algorithm_cutoff_time
+        else:
+            max_val = self.scenario.performance_data.max()
+            
+        for algorithm in self.scenario.algorithms:
+            x, y = self.__get_cdf_x_y(self.scenario.performance_data[algorithm], max_val)
+            ax1.step(x,y, label=algorithm)
+    
+        ax1.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.5)
+        ax1.set_xlabel("Performance")
+        ax1.set_ylabel("P(x<X)")
+        ax1.set_xlim([self.scenario.performance_data.min().min(),max_val])
+        ax1.set_xscale('log')
+    
+        #ax1.legend(loc='lower right')
+        ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    
+        out_fn = os.path.join(self.output_dn, "cdf_plot.png")
+            
+        plt.savefig(out_fn, facecolor='w', edgecolor='w',
+                    orientation='portrait', papertype=None, format=None,
+                    transparent=False, pad_inches=0.02, bbox_inches='tight')
+        
+        return out_fn
+        
+    def __get_cdf_x_y(self, data, cutoff):
+        b_x, b_y, i_s = [], [], 0
+        for i, x in enumerate(np.sort(data)):
+            b_x.append(x)
+            if x < cutoff:
+                b_y.append(float(i) /len(data))
+                i_s = i
+            else: 
+                b_y.append(float(i_s) /len(data))
+        return b_x, b_y     
+    
+    def get_violin_plots(self):
+        '''
+            compute violin plots (fancy box plots) for each algorithm
+        '''
+        
+        self.logger.info("Plotting vilion plots........")
+        
+        cutoff = self.scenario.algorithm_cutoff_time
+        fig, ax = plt.subplots(nrows=1, ncols=1)
+        all_data = self.scenario.performance_data.values
+        all_data[all_data > cutoff] = cutoff
+        
+        if self.scenario.performance_type[0] == "runtime":
+            all_data = np.log10(all_data)
+            y_label = "log(%s)" %(self.scenario.performance_type[0])
+        else:
+            y_label = "%s" %(self.scenario.performance_type[0])
+        n_points = all_data.shape[0]
+        all_data = [all_data[:,i] for i in range(all_data.shape[1])]
+        ax.violinplot(all_data,showmeans=False,showmedians=True,points=n_points)
+            
+        ax.yaxis.grid(True)
+        ax.set_ylabel(y_label)
+        
+        plt.setp(ax, xticks=[y+1 for y in range(len(all_data))],
+         xticklabels=self.scenario.performance_data.columns.values)
+         
+        labels = ax.get_xticklabels()
+        plt.setp(labels, rotation=45, fontsize=12, ha="right")
+        
+        plt.tight_layout()
+        
+        out_fn = "violin_plot.png"
+        plt.savefig(out_fn)
+        
+    def get_box_plots(self):
+        '''
+            compute violin plots (fancy box plots) for each algorithm
+        '''
+        
+        self.logger.info("Plotting box plots........")
+        
+        cutoff = self.scenario.algorithm_cutoff_time
+        fig, ax = plt.subplots(nrows=1, ncols=1)
+        all_data = self.scenario.performance_data.values
+        all_data[all_data > cutoff] = cutoff
+        
+        n_points = all_data.shape[0]
+        all_data = [all_data[:,i] for i in range(all_data.shape[1])]
+        
+        ax.boxplot(all_data)
+            
+        ax.yaxis.grid(True)
+        y_label = "%s" %(self.scenario.performance_type[0])
+        ax.set_ylabel(y_label)
+        
+        if self.scenario.performance_type[0] == "runtime":
+            ax.set_yscale('log')
+        
+        plt.setp(ax, xticks=[y+1 for y in range(len(all_data))],
+         xticklabels=self.scenario.performance_data.columns.values)
+         
+        labels = ax.get_xticklabels()
+        plt.setp(labels, rotation=45, fontsize=12, ha="right")
+        
+        plt.tight_layout()
+        
+        out_fn = "box_plot.png"
+        plt.savefig(out_fn)
     
