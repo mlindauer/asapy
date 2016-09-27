@@ -97,8 +97,10 @@ class ASAPy(object):
         
         
         data = {"Performance Analysis":
-                    {"Correlation Plot": 
-                        {"figure" : correlation_plot
+                    {"tooltip": "hello world",
+                     "Correlation Plot": 
+                        {"figure" : correlation_plot,
+                         "tooltip": "Correlation Plot"
                          },
                      "Contribution Values":
                         {"table": df_contributions.to_html()

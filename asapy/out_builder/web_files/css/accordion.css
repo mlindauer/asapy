@@ -9,21 +9,23 @@ button.accordion {
     outline: none;
     font-size: 15px;
     transition: 0.4s;
+    position:relative;
 }
 
 button.accordion.active, button.accordion:hover {
     background-color: #ddd;
 }
 
-button.accordion:after {
+button.accordion:before {
     content: '\02795';
     font-size: 13px;
     color: #777;
-    float: right;
+    float: left;
     margin-left: 5px;
+    padding-right: 5px;
 }
 
-button.accordion.active:after {
+button.accordion.active:before {
     content: "\2796";
 }
 
@@ -38,5 +40,7 @@ div.panel {
 
 div.panel.show {
     opacity: 1;
-    max-height: 500px;
+    max-height: 50000px;
 }
+
+

@@ -43,7 +43,17 @@ class HTMLBuilder(object):
 <title>ASAPy for %s</title>
 
 <link href="css/accordion.css" rel="stylesheet" />
+<link href="css/table.css" rel="stylesheet" />
+<link href="css/lightbox.min.css" rel="stylesheet" />
+<link href="css/help-tip.css" rel="stylesheet" />
 
+</head>
+<body>
+<script src="js/lightbox-plus-jquery.min.js"></script>        
+        ''' %(scenario_name)
+        
+        self.footer = '''
+</body>
 <script>
 var acc = document.getElementsByClassName("accordion");
 var i;
@@ -54,13 +64,7 @@ for (i = 0; i < acc.length; i++) {
         this.nextElementSibling.classList.toggle("show");
   }
 }
-</script>
-</head>
-<body>        
-        ''' %(scenario_name)
-        
-        self.footer = '''
-</body>        
+</script>        
 </html>        
         '''
         
@@ -96,17 +100,20 @@ for (i = 0; i < acc.length; i++) {
         ''' 
         add a further layer of top data_dict keys
         '''
-        html_str += "<button class=\"accordion\">{}</button>\n".format(layer_name)
+        tooltip = ""
+        if data_dict.get("tooltip"):
+            tooltip = "<div class=\"help-tip\"><p>{}</p></div>".format(data_dict.get("tooltip"))
+        html_str += "<button class=\"accordion\">{0} {1}</button>\n".format(layer_name,tooltip)
         html_str += "<div class=\"panel\">\n"
         for k, v in data_dict.items():
             if isinstance(v, dict):
                 html_str = self.add_layer(html_str, k, v)
             elif k == "figure":
                 html_str +="<div align=\"center\">\n"
-                html_str +="<a href=\"{0}\" data-lightbox=\"{0}\" data-title=\"{0}\"><img src=\"{0}\" alt=\"Plot\" width=\"300px\"></a>\n".format(v)
+                html_str +="<a href=\"{0}\" data-lightbox=\"{0}\" data-title=\"{0}\"><img src=\"{0}\" alt=\"Plot\" width=\"600px\"></a>\n".format(v)
                 html_str +="</div>\n"
             elif k == "table":
-                html_str += "<div>\n{}\n</div>\n".format(v)
+                html_str += "<div align=\"center\">\n{}\n</div>\n".format(v)
             elif k == "tooltip":
                 pass #TODO
         
