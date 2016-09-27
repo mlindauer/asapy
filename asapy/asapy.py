@@ -1,6 +1,8 @@
 import argparse
 import logging
 import sys
+from collections import namedtuple
+
 
 from autofolio.data.aslib_scenario import ASlibScenario 
 from dask.dataframe.io import csv_defaults
@@ -37,7 +39,7 @@ class ASAPy(object):
         '''
         
         self.scenario = ASlibScenario()
-        self.scenario.read_scenario(dn=self.scenario_dn)
+        self.scenario.read_scenario(dn=scenario_dn)
         
     def read_scenario_CSV(self, csv_data: namedtuple):
         '''

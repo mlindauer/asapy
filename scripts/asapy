@@ -9,13 +9,16 @@ cmd_folder = os.path.realpath(os.path.join(cmd_folder, ".."))
 if cmd_folder not in sys.path:
     sys.path.insert(0,cmd_folder)
 
+from collections import namedtuple
+import argparse
+
 from asapy.asapy import ASAPy
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 aslib = parser.add_argument_group("ASlib Format")
 aslib.add_argument("--scenario", default=None, help="directory to ASlib Scenario")
 
-csv = self._arg_parser.add_argument_group("Reading from CSV Format")
+csv = parser.add_argument_group("Reading from CSV Format")
 csv.add_argument("--performance_csv", default=None,
                  help="performance data in csv table (column: algorithm, row: instance, delimeter: ,)")
 csv.add_argument("--feature_csv", default=None,
@@ -32,7 +35,7 @@ optional.add_argument("--verbose", choices=["INFO", "DEBUG"], default="INFO", he
 
 args_ = parser.parse_args()
 
-asapy = ASAPy(outout_dn=args_.output)
+asapy = ASAPy(output_dn=args_.output)
 
 if args_.scenario:
 	asapy.read_scenario_ASlib(scenario_dn=args_.scenario)
