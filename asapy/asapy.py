@@ -15,6 +15,7 @@ from plottingscripts.plotting.scatter import plot_scatter_plot
 from autofolio.data.aslib_scenario import ASlibScenario 
 
 from asapy.perf_analysis.perf_analysis import PerformanceAnalysis
+from asapy.out_builder.html_builder import HTMLBuilder
 
 __author__ = "Marius Lindauer"
 __copyright__ = "Copyright 2016, ML4AAD"
@@ -77,7 +78,7 @@ class ASAPy(object):
         pa = PerformanceAnalysis(output_dn=self.output_dn,
                             scenario=self.scenario)
         # generate scatter plots
-        scatter_plots = pa.scatter_plots()
+        #scatter_plots = pa.scatter_plots()
         
         # generate correlation plot
         correlation_plot = pa.correlation_plot()
@@ -93,4 +94,21 @@ class ASAPy(object):
         
         # get box plot
         box_plot = pa.get_box_plots()
+        
+        
+        data = {"Performance Analysis":
+                    {"Correlation Plot": 
+                        {"figure" : correlation_plot
+                         },
+                     "Contribution Values":
+                        {"table": df_contributions.to_html()
+                         },
+                     "CDF plots":
+                        {"figure": cdf_plot}
+                     }
+                }
+        
+        html_builder = HTMLBuilder(output_dn=self.output_dn,
+                 scenario_name=self.scenario.scenario)
+        html_builder.generate_html(data)
         
