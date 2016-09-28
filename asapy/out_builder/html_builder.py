@@ -60,6 +60,8 @@ class HTMLBuilder(object):
         '''.format(scenario_name)
         
         self.footer = '''
+        
+Powered by <a href="http://www.coseal.net">COSEAL</a> and <a href="http://www.ml4aad.org">ML4AAD</a> 
 </body>
 <script>
 var acc = document.getElementsByClassName("accordion");

@@ -70,6 +70,10 @@
 }
 
 .dataframe th{
+	text-align:right;
+}
+
+.dataframe th:first-child{
 	text-align:center;
 }
 
