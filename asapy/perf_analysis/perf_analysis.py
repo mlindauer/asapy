@@ -137,9 +137,12 @@ class PerformanceAnalysis(object):
         ax.set_xticklabels(sorted_algos, minor=False)
         ax.set_yticklabels(sorted_algos, minor=False)
         labels = ax.get_xticklabels()
-        plt.setp(labels, rotation=45, fontsize=12)
+        plt.setp(labels, rotation=45, fontsize=12, ha="left")
         labels = ax.get_yticklabels()
         plt.setp(labels, rotation=0, fontsize=12)
+        
+        fig.colorbar(heatmap)
+        
         plt.tight_layout()
         
         out_plot = os.path.join(self.output_dn, "correlation_plot.png")
