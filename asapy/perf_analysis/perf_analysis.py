@@ -75,7 +75,7 @@ class PerformanceAnalysis(object):
                 out_name = os.path.join(self.output_dn, 
                                          "scatter_%s_%s.png" % (algo_1.replace("/","_"),algo_2.replace("/","_")))
                 fig.savefig(out_name)
-                plots.append(out_name)
+                plots.append((algo_1, algo_2, out_name))
                 
         return plots
         
@@ -377,6 +377,8 @@ class PerformanceAnalysis(object):
         out_fn = "violin_plot.png"
         plt.savefig(out_fn)
         
+        return out_fn
+        
     def get_box_plots(self):
         '''
             compute violin plots (fancy box plots) for each algorithm
@@ -411,4 +413,6 @@ class PerformanceAnalysis(object):
         
         out_fn = "box_plot.png"
         plt.savefig(out_fn)
+        
+        return out_fn
     

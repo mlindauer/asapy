@@ -2,6 +2,9 @@ import argparse
 import logging
 import sys
 import os
+import shutil
+import inspect
+from traceback import print_exc
 from collections import namedtuple
 
 import numpy as np
@@ -34,13 +37,16 @@ class HTMLBuilder(object):
         '''
         self.logger = logging.getLogger("HTMLBuilder")
         
+        
+        self.own_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+        
         self.output_dn = output_dn
         
         self.header='''
 <!DOCTYPE html>
 <html>
 <head>
-<title>ASAPy for %s</title>
+<title>ASAPy for {0}</title>
 
 <link href="css/accordion.css" rel="stylesheet" />
 <link href="css/table.css" rel="stylesheet" />
@@ -49,8 +55,9 @@ class HTMLBuilder(object):
 
 </head>
 <body>
-<script src="js/lightbox-plus-jquery.min.js"></script>        
-        ''' %(scenario_name)
+<script src="js/lightbox-plus-jquery.min.js"></script>      
+<h1>{0}</h1>  
+        '''.format(scenario_name)
         
         self.footer = '''
 </body>
@@ -95,6 +102,23 @@ for (i = 0; i < acc.length; i++) {
         
         with open(os.path.join(self.output_dn, "report.html"), "w") as fp:
             fp.write(html)
+        
+        try: 
+            if not os.path.isdir(os.path.join(self.output_dn,"css")):
+                shutil.copytree(os.path.join(self.own_folder, "web_files", "css"), os.path.join(self.output_dn,"css"))
+        except OSError:
+            print_exc()
+        try:
+            if not os.path.isdir(os.path.join(self.output_dn,"images")): 
+                shutil.copytree(os.path.join(self.own_folder, "web_files", "images"), os.path.join(self.output_dn,"images"))
+        except OSError:
+            print_exc()
+        try: 
+            if not os.path.isdir(os.path.join(self.output_dn,"js")):
+                shutil.copytree(os.path.join(self.own_folder, "web_files", "js"), os.path.join(self.output_dn,"js"))
+        except OSError:
+            print_exc()
+            
         
     def add_layer(self, html_str:str, layer_name, data_dict:dict):
         ''' 
