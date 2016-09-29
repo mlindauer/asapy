@@ -85,78 +85,91 @@ class ASAPy(object):
         # meta data
         meta_data_df = self.get_meta_data()
         data["Meta Data"] = {
-            "table": meta_data_df.to_html()
+            "table": meta_data_df.to_html(header=False)
         }
 
         # performance analysis
         pa = PerformanceAnalysis(output_dn=self.output_dn,
                                  scenario=self.scenario)
         data["Performance Analysis"] = OrderedDict()
+
+        status_plot = pa.get_bar_status_plot()
+        data["Performance Analysis"]["Status bar plot"] = {"tooltip": "Stacked bar plots for runstatus of each algorithm",
+                                                           "figure": status_plot}
  
         # get box plot
         box_plot = pa.get_box_plots()
-        data["Performance Analysis"]["Box Plot"] = {"tooltip": "Box plots to show the performance distribution of each algorithm",
+        data["Performance Analysis"]["Box plot"] = {"tooltip": "Box plots to show the performance distribution of each algorithm",
                                                     "figure": box_plot}
  
         # get violin plot
         violion_plot = pa.get_violin_plots()
-        data["Performance Analysis"]["Violin Plot"] = {"tooltip": "Violin plots to show the performance distribution of each algorithm",
+        data["Performance Analysis"]["Violin plot"] = {"tooltip": "Violin plots to show the performance distribution of each algorithm",
                                                        "figure": violion_plot}
  
         # get cdf plot
         cdf_plot = pa.get_cdf_plots()
-        data["Performance Analysis"]["CDF Plot"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), how many of the instances (in percentage) can be solved. Better algorithms have a higher curve.",
+        data["Performance Analysis"]["CDF plot"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), how many of the instances (in percentage) can be solved. Better algorithms have a higher curve.",
                                                     "figure": cdf_plot}
  
         # generate scatter plots
         scatter_plots = pa.scatter_plots()
-        data["Performance Analysis"]["Scatter Plots"] = {
+        data["Performance Analysis"]["Scatter plots"] = {
             "tooltip": "Scatter plot to compare the performance of two algorithms on all instances -- each dot represents one instance."}
         for plot_tuple in scatter_plots:
             key = "%s vs %s" % (plot_tuple[0], plot_tuple[1])
-            data["Performance Analysis"]["Scatter Plots"][
+            data["Performance Analysis"]["Scatter plots"][
                 key] = {"figure": plot_tuple[2]}
  
         # generate correlation plot
         correlation_plot = pa.correlation_plot()
-        data["Performance Analysis"]["Correlation Plot"] = {"tooltip": "Correlation based on Spearman Correlation Coefficient between all algorithms and clustered with Wards hierarchical clustering approach. Darker fields corresponds to a larger correlation between the algorithms.",
+        data["Performance Analysis"]["Correlation plot"] = {"tooltip": "Correlation based on Spearman Correlation Coefficient between all algorithms and clustered with Wards hierarchical clustering approach. Darker fields corresponds to a larger correlation between the algorithms.",
                                                             "figure": correlation_plot}
  
         # get shapley values
         df_contributions = pa.get_contribution_values()
-        data["Performance Analysis"]["Contribution of Algorithms"] = {"tooltip": "Contribution of each algorithm wrt to its average performance across all instances, the marginal contribution to the virtual best solver (VBS, aka oracle) (i.e., how much decreases the VBS performance by removing the algorithm; higher value correspond to more importance), and Shapley values (marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance).",
+        data["Performance Analysis"]["Contribution of algorithms"] = {"tooltip": "Contribution of each algorithm wrt to its average performance across all instances, the marginal contribution to the virtual best solver (VBS, aka oracle) (i.e., how much decreases the VBS performance by removing the algorithm; higher value correspond to more importance), and Shapley values (marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance).",
                                                                       "table": df_contributions.to_html()}
 
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         # feature analysis
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         data["Feature Analysis"] = OrderedDict()
         fa = FeatureAnalysis(output_dn=self.output_dn,
                              scenario=self.scenario)
 
+        status_plot = fa.get_bar_status_plot()
+        data["Feature Analysis"]["Status Bar Plot"] = {"tooltip": "Stacked bar plots for runstatus of each feature groupe",
+                                                       "figure": status_plot}
+
         #box and violin plots
         name_plots = fa.get_box_violin_plots()
-        data["Feature Analysis"]["Violin and Box Plots"] = OrderedDict({
+        data["Feature Analysis"]["Violin and box plots"] = OrderedDict({
             "tooltip": "Violin and Box plots to show the distribution of each instance feature. We removed NaN from the data."})
         for plot_tuple in name_plots:
             key = "%s" % (plot_tuple[0])
-            data["Feature Analysis"]["Violin and Box Plots"][
+            data["Feature Analysis"]["Violin and box plots"][
                 key] = {"figure": plot_tuple[1]}
-
+ 
         # correlation plot
         correlation_plot = fa.correlation_plot()
-        data["Feature Analysis"]["Correlation Plot"] = {"tooltip": "Correlation based on Pearson Correlation Coefficient between all features and clustered with Wards hierarchical clustering approach. Darker fields corresponds to a larger correlation between the features.",
+        data["Feature Analysis"]["Correlation plot"] = {"tooltip": "Correlation based on Pearson Correlation Coefficient between all features and clustered with Wards hierarchical clustering approach. Darker fields corresponds to a larger correlation between the features.",
                                                         "figure": correlation_plot}
  
         # feature importance
         importance_plot = fa.feature_importance()
-        data["Feature Analysis"]["Feature Importance"] = {"tooltip": "Using the approach of SATZilla'11, we train a cost-sensitive random forest for each pair of algorithms and average the feature importance (using gini as splitting criterion) across all forests. We show only the 15 most important features",
+        data["Feature Analysis"]["Feature importance"] = {"tooltip": "Using the approach of SATZilla'11, we train a cost-sensitive random forest for each pair of algorithms and average the feature importance (using gini as splitting criterion) across all forests. We show only the 15 most important features",
                                                         "figure": importance_plot}
-
+ 
         # cluster instances in feature space
         cluster_plot = fa.cluster_instances()
         data["Feature Analysis"]["Clustering"] = {"tooltip": "Similar to ISAC, we use a k-means to cluster the instances in the feature space. As pre-processing, we use standard scaling and pca to 2 dimensions. To guess the number of clusters, we use the silhouette score on the range of 2 to 12 in the number of clusters",
                                                         "figure": cluster_plot}
-        
 
+        # get cdf plot
+        cdf_plot = fa.get_feature_cost_cdf_plot()
+        data["Feature Analysis"]["CDF plot on feature costs per feature group"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), for how many of the instances (in percentage) have we computed the instance features. Faster feature computation steps have a higher curve. Missing values are imputed with the maximal value (or running time cutoff).",
+                                                                 "figure": cdf_plot}
 
         self.create_html(data=data)
 
