@@ -173,7 +173,7 @@ class FeatureAnalysis(object):
 
         pc = PairwiseClassifier(classifier_class=RandomForest)
         config = {}
-        config["rf:n_estimators"] = 42
+        config["rf:n_estimators"] = 100
         config["rf:max_features"] = "auto"
         config["rf:criterion"] = "gini"
         config["rf:max_depth"] = None
@@ -183,23 +183,25 @@ class FeatureAnalysis(object):
         pc.fit(scenario=self.scenario, config=config)
 
         importances = [rf.model.feature_importances_ for rf in pc.classifiers]
-        average_importance = np.mean(importances, axis=0)
-        std_importance = np.std(importances, axis=0)
+        median_importance = np.median(importances, axis=0)
+        q25 = np.percentile(importances, 0.25, axis=0)
+        q75 = np.percentile(importances, 0.75, axis=0)
 
         feature_names = np.array(self.scenario.feature_data.columns)
 
         # sort features by average importance and look only at the first 15
         # features
         N_FEAT = min(feature_names.shape[0], 15)
-        indices = np.argsort(average_importance)[::-1]
-        average_importance = average_importance[indices][:N_FEAT]
-        std_importance = std_importance[indices][:N_FEAT]
+        indices = np.argsort(median_importance)[::-1]
+        median_importance = median_importance[indices][:N_FEAT]
+        q25 = q25[indices][:N_FEAT]
+        q75 = q75[indices][:N_FEAT]
         feature_names = feature_names[indices[:N_FEAT]]
 
         plt.figure()
         # only the first 10 most important features
-        plt.bar(range(N_FEAT), average_importance,
-                color="r", yerr=std_importance, align="center")
+        plt.bar(range(N_FEAT), median_importance,
+                color="r", yerr=[q25,q75], align="center")
 
         plt.xlim([-1, N_FEAT])
         plt.xticks(range(N_FEAT), feature_names, rotation=40, ha='right')

@@ -136,7 +136,8 @@ for (i = 0; i < acc.length; i++) {
                 html_str = self.add_layer(html_str, k, v)
             elif k == "figure":
                 html_str +="<div align=\"center\">\n"
-                html_str +="<a href=\"{0}\" data-lightbox=\"{0}\" data-title=\"{0}\"><img src=\"{0}\" alt=\"Plot\" width=\"600px\"></a>\n".format(v)
+                
+                html_str +="<a href=\"{0}\" data-lightbox=\"{0}\" data-title=\"{0}\"><img src=\"{0}\" alt=\"Plot\" width=\"600px\"></a>\n".format(v[len(self.output_dn)+1:])
                 html_str +="</div>\n"
             elif k == "table":
                 html_str += "<div align=\"center\">\n{}\n</div>\n".format(v)

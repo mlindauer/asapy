@@ -146,11 +146,17 @@ class ASAPy(object):
             "table": meta_data_df.to_html(header=False)
         }
 
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         # performance analysis
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         if config.get("Performance Analysis"):
             pa = PerformanceAnalysis(output_dn=self.output_dn,
                                      scenario=self.scenario)
             data["Performance Analysis"] = OrderedDict()
+
+            if self.scenario.performance_type[0] == "solution_quality" and self.scenario.maximize[0]:
+                self.scenario.performance_data *= -1 # revoke inverting the performance as done in the scenario reader
+                self.logger.info("Revoke * -1 on performance data")
     
             if config["Performance Analysis"].get("Status bar plot"):
                 status_plot = pa.get_bar_status_plot()
@@ -229,7 +235,7 @@ class ASAPy(object):
             # feature importance
             if config["Feature Analysis"].get("Feature importance"):
                 importance_plot = fa.feature_importance()
-                data["Feature Analysis"]["Feature importance"] = {"tooltip": "Using the approach of SATZilla'11, we train a cost-sensitive random forest for each pair of algorithms and average the feature importance (using gini as splitting criterion) across all forests. We show only the 15 most important features",
+                data["Feature Analysis"]["Feature importance"] = {"tooltip": "Using the approach of SATZilla'11, we train a cost-sensitive random forest for each pair of algorithms and average the feature importance (using gini as splitting criterion) across all forests. We show only the 15 most important features. We show the median, 25th and 75th percentiles across all random forests.",
                                                             "figure": importance_plot}
      
             # cluster instances in feature space

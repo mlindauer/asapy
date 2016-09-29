@@ -63,7 +63,7 @@ class PerformanceAnalysis(object):
         if self.scenario.performance_type[0] == "runtime":
             max_val = self.scenario.algorithm_cutoff_time
         else:
-            max_val = self.scenario.performance_data.max()
+            max_val = self.scenario.performance_data.max().max()
 
         for i in range(n_algos):
             for j in range(i + 1, n_algos):
@@ -321,10 +321,10 @@ class PerformanceAnalysis(object):
 
         if self.scenario.performance_type[0] == "runtime":
             max_val = self.scenario.algorithm_cutoff_time
+            min_val = max(0.0005, self.scenario.performance_data.min().min())
         else:
-            max_val = self.scenario.performance_data.max()
-
-        min_val = max(0.0005, self.scenario.performance_data.min().min())
+            max_val = self.scenario.performance_data.max().max()
+            min_val = self.scenario.performance_data.min().min()
 
         for algorithm in self.scenario.algorithms:
             x, y = get_cdf_x_y(
@@ -339,7 +339,8 @@ class PerformanceAnalysis(object):
         ax1.set_xlabel(self.scenario.performance_measure[0])
         ax1.set_ylabel("P(x<X)")
         ax1.set_xlim([min_val, max_val])
-        ax1.set_xscale('log')
+        if self.scenario.performance_type[0] == "runtime":
+            ax1.set_xscale('log')
 
         #ax1.legend(loc='lower right')
         ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5))
