@@ -2,8 +2,8 @@ import logging
 import os
 
 import numpy as np
+from numpy import corrcoef
 
-from scipy.stats import pearsonr
 from scipy.cluster.hierarchy import linkage
 from scipy.misc import comb
 
@@ -107,7 +107,7 @@ class FeatureAnalysis(object):
         data = np.zeros((n_features, n_features)) + 1  # similarity
         for i in range(n_features):
             for j in range(i + 1, n_features):
-                rho, p = pearsonr(feature_data[:, i], feature_data[:, j])
+                rho = corrcoef([feature_data[:, i], feature_data[:, j]])[0,1]
                 if np.isnan(rho):  # is nan if one feature vec is constant
                     rho = 0
                 data[i, j] = rho

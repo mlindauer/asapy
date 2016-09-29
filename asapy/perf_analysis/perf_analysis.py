@@ -142,7 +142,7 @@ class PerformanceAnalysis(object):
         ax.set_xticklabels(sorted_algos, minor=False)
         ax.set_yticklabels(sorted_algos, minor=False)
         labels = ax.get_xticklabels()
-        plt.setp(labels, rotation=45, fontsize=12, ha="left")
+        plt.setp(labels, rotation=90, fontsize=12, ha="left")
         labels = ax.get_yticklabels()
         plt.setp(labels, rotation=0, fontsize=12)
 
@@ -324,16 +324,21 @@ class PerformanceAnalysis(object):
         else:
             max_val = self.scenario.performance_data.max()
 
+        min_val = max(0.0005, self.scenario.performance_data.min().min())
+
         for algorithm in self.scenario.algorithms:
             x, y = get_cdf_x_y(
                 self.scenario.performance_data[algorithm], max_val)
+            x = np.array(x)
+            y = np.array(y)
+            x[x < min_val] = min_val
             ax1.step(x, y, label=algorithm)
 
         ax1.grid(
             True, linestyle='-', which='major', color='lightgrey', alpha=0.5)
-        ax1.set_xlabel("Performance")
+        ax1.set_xlabel(self.scenario.performance_measure[0])
         ax1.set_ylabel("P(x<X)")
-        ax1.set_xlim([self.scenario.performance_data.min().min(), max_val])
+        ax1.set_xlim([min_val, max_val])
         ax1.set_xscale('log')
 
         #ax1.legend(loc='lower right')
