@@ -164,15 +164,11 @@ class PerformanceAnalysis(object):
             pandas.DataFrame() with columns being "Average Performance", "Marginal Performance", "Shapley Values" and indexes being the algorithms
         '''
         
-        self.scenario.performance_data += 1
-
         self.logger.info("Get contribution scores........")
 
         algorithms = self.scenario.algorithms
         instances = self.scenario.instances
         scenario = self.scenario
-        
-        
         
         performance_data = scenario.performance_data
 
