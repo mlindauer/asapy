@@ -1,6 +1,6 @@
 button.accordion {
-    background-color: #eee;
-    color: #444;
+    background-color: rgb(103, 84, 18);
+    color: #fff;
     cursor: pointer;
     padding: 18px;
     width: 100%;
@@ -8,12 +8,17 @@ button.accordion {
     text-align: left;
     outline: none;
     font-size: 15px;
+	font-family: 'Ubuntu', sans-serif;
     transition: 0.4s;
     position:relative;
+	border-bottom: 2px solid #333;
+	
+	background-color: #999;
 }
 
 button.accordion.active, button.accordion:hover {
-    background-color: #ddd;
+    background-color: rgb(171, 139, 31);
+	background: #666;
 }
 
 button.accordion:before {
@@ -31,7 +36,7 @@ button.accordion.active:before {
 
 div.panel {
     padding: 0 18px;
-    background-color: white;
+    background-color: transparent;
     max-height: 0;
     overflow: hidden;
     transition: 0.6s ease-in-out;

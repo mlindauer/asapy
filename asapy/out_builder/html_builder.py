@@ -52,16 +52,31 @@ class HTMLBuilder(object):
 <link href="css/table.css" rel="stylesheet" />
 <link href="css/lightbox.min.css" rel="stylesheet" />
 <link href="css/help-tip.css" rel="stylesheet" />
+<link href="css/global.css" rel="stylesheet" />
+<link href="css/back-to-top.css" rel="stylesheet" />
 
 </head>
 <body>
-<script src="js/lightbox-plus-jquery.min.js"></script>      
+
+<script src="js/lightbox-plus-jquery.min.js"></script>
+<header>
+    <div class='l-wrapper'>    
+        <img class='logo logo--coseal' src="images/COSEAL_small.png" />
+        <img class='logo logo--ml' src="images/ml4aad.png" />
+    </div>
+</header>
+
+<div class='l-wrapper'>          
 <h1>{0}</h1>  
         '''.format(scenario_name)
         
         self.footer = '''
-        
-Powered by <a href="http://www.coseal.net">COSEAL</a> and <a href="http://www.ml4aad.org">ML4AAD</a> 
+</div>
+<footer>        
+    <div class='l-wrapper'>
+        Powered by <a href="http://www.coseal.net">COSEAL</a> and <a href="http://www.ml4aad.org">ML4AAD</a> 
+    </div>
+</footer>
 </body>
 <script>
 var acc = document.getElementsByClassName("accordion");
@@ -73,10 +88,10 @@ for (i = 0; i < acc.length; i++) {
         this.nextElementSibling.classList.toggle("show");
   }
 }
-</script>        
+</script>
+<script src="js/back-to-top.js"></script>         
 </html>        
         '''
-        
         
     def generate_html(self, data_dict:dict):
         '''
@@ -120,6 +135,11 @@ for (i = 0; i < acc.length; i++) {
                 shutil.copytree(os.path.join(self.own_folder, "web_files", "js"), os.path.join(self.output_dn,"js"))
         except OSError:
             print_exc()
+        try: 
+            if not os.path.isdir(os.path.join(self.output_dn,"font")):
+                shutil.copytree(os.path.join(self.own_folder, "web_files", "font"), os.path.join(self.output_dn,"font"))
+        except OSError:
+            print_exc()
             
         
     def add_layer(self, html_str:str, layer_name, data_dict:dict):
@@ -136,8 +156,7 @@ for (i = 0; i < acc.length; i++) {
                 html_str = self.add_layer(html_str, k, v)
             elif k == "figure":
                 html_str +="<div align=\"center\">\n"
-                
-                html_str +="<a href=\"{0}\" data-lightbox=\"{0}\" data-title=\"{0}\"><img src=\"{0}\" alt=\"Plot\" width=\"600px\"></a>\n".format(v[len(self.output_dn)+1:])
+                html_str +="<a href=\"{0}\" data-lightbox=\"{0}\" data-title=\"{0}\"><img src=\"{0}\" alt=\"Plot\" width=\"600px\"></a>\n".format(v[len(self.output_dn):].lstrip("/"))
                 html_str +="</div>\n"
             elif k == "table":
                 html_str += "<div align=\"center\">\n{}\n</div>\n".format(v)

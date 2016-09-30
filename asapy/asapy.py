@@ -42,6 +42,9 @@ class ASAPy(object):
 
         self.scenario = None
         self.output_dn = output_dn
+        
+        if not os.path.isdir(self.output_dn):
+            os.mkdir(self.output_dn)
 
     def read_scenario_ASlib(self, scenario_dn: str):
         '''
@@ -184,8 +187,9 @@ class ASAPy(object):
             # generate scatter plots
             if config["Performance Analysis"].get("Scatter plots"):
                 scatter_plots = pa.scatter_plots()
-                data["Performance Analysis"]["Scatter plots"] = {
-                    "tooltip": "Scatter plot to compare the performance of two algorithms on all instances -- each dot represents one instance."}
+                data["Performance Analysis"]["Scatter plots"] = OrderedDict({
+                    "tooltip": "Scatter plot to compare the performance of two algorithms on all instances -- each dot represents one instance."})
+                scatter_plots  = sorted(scatter_plots, key=lambda x: x[0]+x[1])
                 for plot_tuple in scatter_plots:
                     key = "%s vs %s" % (plot_tuple[0], plot_tuple[1])
                     data["Performance Analysis"]["Scatter plots"][

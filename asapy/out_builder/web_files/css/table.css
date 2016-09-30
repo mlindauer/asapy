@@ -2,7 +2,7 @@
 	margin:0px;padding:0px;
 	width:50%;
 	box-shadow: 10px 10px 5px #888888;
-	border:1px solid #000000;
+	border:0px solid #000000;
 	
 	-moz-border-radius-bottomleft:0px;
 	-webkit-border-bottom-left-radius:0px;
@@ -21,7 +21,8 @@
 	border-top-left-radius:0px;
 }.dataframe table{
     border-collapse: collapse;
-        border-spacing: 0;
+    border-spacing: 0;
+	border: 0;	
 	width:100%;
 	height:100%;
 	margin:0px;padding:0px;
@@ -46,10 +47,10 @@
 }.dataframe tr:hover td{
 	
 }
-.dataframe tr:nth-child(odd){ background-color:#e5e5e5; }
+.dataframe tr:nth-child(odd){ background-color:rgb(145, 205, 63); }
 .dataframe tr:nth-child(even)    { background-color:#ffffff; }.dataframe td{
 	vertical-align:middle;
-	border:1px solid #000000;
+	border:0px solid #000000;
 	border-width:0px 1px 1px 0px;
 	text-align:left;
 	padding:7px;
@@ -58,9 +59,9 @@
 	font-weight:normal;*/
 	color:#000000;
 }.dataframe tr:last-child td{
-	border-width:0px 1px 0px 0px;
+	border-width:0px 0px 0px 0px;
 }.dataframe tr td:last-child{
-	border-width:0px 0px 1px 0px;
+	border-width:0px 0px 0px 0px;
 }.dataframe tr:last-child td:last-child{
 	border-width:0px 0px 0px 0px;
 }
@@ -68,8 +69,11 @@
 .dataframe tr, .dataframe td{
 	text-align:right;
 }
-
+.dataframe td {
+	border: 0;
+}
 .dataframe th{
+	border: 0;
 	text-align:right;
 }
 
