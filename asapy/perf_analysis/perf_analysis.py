@@ -163,12 +163,23 @@ class PerformanceAnalysis(object):
             ------
             pandas.DataFrame() with columns being "Average Performance", "Marginal Performance", "Shapley Values" and indexes being the algorithms
         '''
+        
+        self.scenario.performance_data += 1
 
         self.logger.info("Get contribution scores........")
 
         algorithms = self.scenario.algorithms
         instances = self.scenario.instances
         scenario = self.scenario
+        
+        
+        
+        performance_data = scenario.performance_data
+
+
+        if self.scenario.maximize[0] == False:
+            # Shapley code assumes higher is better
+            performance_data = performance_data * -1 
 
         is_time_scenario = self.scenario.performance_type[0] == "runtime"
 
@@ -176,13 +187,23 @@ class PerformanceAnalysis(object):
             if is_time_scenario:
                 perf = scenario.algorithm_cutoff_time - \
                     min(scenario.algorithm_cutoff_time,
-                        scenario.performance_data[algo][inst])
+                        performance_data[algo][inst])
                 return perf
             else:
-                return scenario.performance_data[algo][inst]
+                return performance_data[algo][inst]
 
         shapleys = self._get_VBS_Shap(instances, algorithms, metric)
-        marginales = self._get_marginal_contribution()
+        if self.scenario.maximize[0] == False:
+            performance_data = performance_data * -1
+        
+        if self.scenario.maximize[0] == True:
+            # marginal contribution code assumes: smaller is better
+            self.scenario.performance_data = self.scenario.performance_data * -1
+            
+        marginales = self._get_marginal_contribution() 
+        if self.scenario.maximize[0] == True:
+            self.scenario.performance_data = self.scenario.performance_data * -1
+            
         averages = self._get_average_perf()
 
         data = np.zeros((len(algorithms), 3))
@@ -190,7 +211,7 @@ class PerformanceAnalysis(object):
             data[indx] = np.array(
                 [averages[algo], marginales[algo], shapleys[algo]])
         df = DataFrame(data=data, index=algorithms, columns=[
-                       "Average Performance", "Marginal Performance", "Shapley Values"])
+                       "Average Performance", "Marginal Contribution", "Shapley Values"])
 
         return df
 
@@ -201,7 +222,7 @@ class PerformanceAnalysis(object):
         averages = {}
         for algorithm in self.scenario.algorithms:
             averages[algorithm] = self.scenario.performance_data[
-                algorithm].mean()
+                algorithm].sum()
         return averages
 
     def _get_marginal_contribution(self):
@@ -215,7 +236,7 @@ class PerformanceAnalysis(object):
                 set(self.scenario.algorithms).difference([algorithm]))
             perf_data = self.scenario.performance_data[remaining_algos]
             rem_vbs = self.__get_vbs(perf_data)
-            marginales[algorithm] = rem_vbs - all_vbs
+            marginales[algorithm] = rem_vbs - all_vbs 
 
         return marginales
 
