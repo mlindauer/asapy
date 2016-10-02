@@ -50,6 +50,7 @@ header {
 }
 .logo--ml {
 	float: right;
+	padding-top: 25px;
 }
 h1 {
 	font-size: 3em;
