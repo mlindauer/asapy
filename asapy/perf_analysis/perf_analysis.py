@@ -482,3 +482,31 @@ class PerformanceAnalysis(object):
         plt.savefig(out_fn, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
         return out_fn
+    
+    def get_cd_diagram(self):
+        '''
+            computes critical distance plots with the orange package
+        '''
+        import Orange
+
+        MAX_ALGOS = 20
+
+        matplotlib.pyplot.close()
+        self.logger.info("Plotting critical distance plots........")
+        names = list(self.scenario.performance_data.columns)     # labels of each technique
+        if len(names) > MAX_ALGOS:
+            names = names[:MAX_ALGOS]
+            performance_data = self.scenario.performance_data[names]
+        else:
+            performance_data = self.scenario.performance_data
+        
+        avranks = performance_data.rank(axis=1).mean(axis=0).values # average ranking of each technique
+        number_of_datasets = len(self.scenario.instances) # number of datasets
+        
+        print(avranks.shape)
+        print(len(names))
+        cd = Orange.evaluation.compute_CD(avranks, number_of_datasets)
+        out_fn = os.path.join(self.output_dn, "cd_diagram.png")
+        Orange.evaluation.graph_ranks(avranks, names, cd=cd, width=12, textspace=2)
+        plt.savefig(out_fn)
+        return out_fn

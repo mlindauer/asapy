@@ -89,7 +89,8 @@ class ASAPy(object):
                                             "CDF plot" : True,
                                             "Scatter plots": True,
                                             "Correlation plot" : True,
-                                            "Contribution of algorithms": True
+                                            "Contribution of algorithms": True,
+                                            "Critical Distance Diagram": True,
                                             },
                   "Feature Analysis": {"Status Bar Plot": True,
                                        "Violin and box plots":True,
@@ -183,6 +184,13 @@ class ASAPy(object):
                 cdf_plot = pa.get_cdf_plots()
                 data["Performance Analysis"]["CDF plot"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), how many of the instances (in percentage) can be solved. Better algorithms have a higher curve.",
                                                         "figure": cdf_plot}
+
+            # get cd diagram
+            if config["Performance Analysis"].get("Critical Distance Diagram"):
+                cd_plot = pa.get_cd_diagram()
+                data["Performance Analysis"]["Critical Distance Diagram"] = {"tooltip": "Critical Distance diagram.",
+                                                        "figure": cd_plot}
+
      
             # generate scatter plots
             if config["Performance Analysis"].get("Scatter plots"):
