@@ -31,6 +31,7 @@ csv.add_argument("--maximize", default=False, action="store_true", help="Set thi
 
 optional = parser.add_argument_group("Optional Arguments")
 optional.add_argument("--output", default=".", help="output directory")
+optional.add_argument("--max_algos", default=20, type=int, help="maximal number of algorithms to analyze")
 optional.add_argument("--print_config", default=False, action="store_true", help="print config template and exit")
 optional.add_argument("--load_config", default=None, help="load config file")
 optional.add_argument("--verbose", choices=["INFO", "DEBUG"], default="INFO", help="verbosity level")
@@ -58,4 +59,4 @@ elif args_.performance_csv:
 	csv_data = CSV_Data(args_.performance_csv, args_.feature_csv, args_.objective, args_.runtime_cutoff, args._maximize)
 	asapy.read_scenario_CSV(csv_data)
 
-asapy.main(config)
+asapy.main(config, args_.max_algos)

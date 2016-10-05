@@ -128,7 +128,7 @@ class ASAPy(object):
             
         return config
 
-    def main(self, config: dict):
+    def main(self, config: dict, max_algos:int=20):
         '''
             main method
             
@@ -136,12 +136,24 @@ class ASAPy(object):
             ---------
             config: dict
                 configuration that enables or disables plots
+            max_algos: int
+                maximum number of algos to consider; if more are available, we take the n best algorithm on average performance
         '''
 
+        n_prev_algos = None
         if self.scenario is None:
             raise ValueError(
                 "Please first read in Scenario data; use scenario input or csv input")
-
+        if len(self.scenario.algorithms) > max_algos:
+            n_prev_algos = len(self.scenario.algorithms)
+            self.logger.warn("We reduce the algorithms to the best %d algorithms" %(max_algos))
+            # we assume here that we talking about minimization of the performance values; should be ensured in the ASlib reader
+            sorted_algos = list(self.scenario.performance_data.mean(axis=0).sort_values().index) 
+            best_algos = sorted_algos[:max_algos]
+            self.scenario.algorithms = best_algos
+            self.scenario.performance_data = self.scenario.performance_data[best_algos]
+            self.scenario.runstatus_data = self.scenario.runstatus_data[best_algos]
+               
         data = OrderedDict()
 
         # meta data
@@ -157,6 +169,8 @@ class ASAPy(object):
             pa = PerformanceAnalysis(output_dn=self.output_dn,
                                      scenario=self.scenario)
             data["Performance Analysis"] = OrderedDict()
+            if n_prev_algos is not None:
+                data["Performance Analysis"]["tooltip"] = "To provide a clear overview, we reduced the number of algorithms (%d) to the best %d algorithms on average" %(n_prev_algos, max_algos)
 
             if self.scenario.performance_type[0] == "solution_quality" and self.scenario.maximize[0]:
                 self.scenario.performance_data *= -1 # revoke inverting the performance as done in the scenario reader
