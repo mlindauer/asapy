@@ -188,7 +188,7 @@ class ASAPy(object):
             # get cd diagram
             if config["Performance Analysis"].get("Critical Distance Diagram"):
                 cd_plot = pa.get_cd_diagram()
-                data["Performance Analysis"]["Critical Distance Diagram"] = {"tooltip": "Critical Distance diagram.",
+                data["Performance Analysis"]["Critical Distance Diagram"] = {"tooltip": "Critical Distance diagram based on a Nemenyi two tailed test using average rankings. CD (top left) shows the critical distance. Distances larger than CD corresponds to a statistical significant difference in the ranking. We show only the best 20 ranked algorithms.",
                                                         "figure": cd_plot}
 
      
@@ -212,8 +212,8 @@ class ASAPy(object):
             # get shapley values
             if config["Performance Analysis"].get("Contribution of algorithms"):
                 df_contributions = pa.get_contribution_values()
-                data["Performance Analysis"]["Contribution of algorithms"] = {"tooltip": "Contribution of each algorithm wrt to its average performance across all instances, the marginal contribution to the virtual best solver (VBS, aka oracle) (i.e., how much decreases the VBS performance by removing the algorithm; higher value correspond to more importance), and Shapley values (marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance).",
-                                                                          "table": df_contributions.to_html()}
+                data["Performance Analysis"]["Contribution of algorithms"] = {"tooltip": "Contribution of each algorithm wrt to its average performance across all instances, the marginal contribution to the virtual best solver (VBS, aka oracle) (i.e., how much decreases the VBS performance by removing the algorithm; higher value correspond to more importance), and Shapley values (marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance; see Frechette et al AAAI'16).",
+                                                                          "table": df_contributions.to_html(formatters=["{0:.4f}".format,"{0:.4f}".format,"{0:.4f}".format])}
 
         #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         # feature analysis

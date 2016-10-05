@@ -218,7 +218,7 @@ class PerformanceAnalysis(object):
         averages = {}
         for algorithm in self.scenario.algorithms:
             averages[algorithm] = self.scenario.performance_data[
-                algorithm].sum()
+                algorithm].mean()
         return averages
 
     def _get_marginal_contribution(self):
@@ -489,12 +489,14 @@ class PerformanceAnalysis(object):
         '''
         import Orange
 
-        MAX_ALGOS = 20
+        MAX_ALGOS = 20 # orange allows unfortunately only 20 algorithms for cd diagrams
 
         matplotlib.pyplot.close()
         self.logger.info("Plotting critical distance plots........")
         names = list(self.scenario.performance_data.columns)     # labels of each technique
         if len(names) > MAX_ALGOS:
+            # sort algorithms by their average ranks
+            names = list(self.scenario.performance_data.rank(axis=1).mean(axis=0).sort_values().index)
             names = names[:MAX_ALGOS]
             performance_data = self.scenario.performance_data[names]
         else:
@@ -503,9 +505,7 @@ class PerformanceAnalysis(object):
         avranks = performance_data.rank(axis=1).mean(axis=0).values # average ranking of each technique
         number_of_datasets = len(self.scenario.instances) # number of datasets
         
-        print(avranks.shape)
-        print(len(names))
-        cd = Orange.evaluation.compute_CD(avranks, number_of_datasets)
+        cd = Orange.evaluation.compute_CD(avranks, number_of_datasets, alpha="0.05", test='nemenyi')
         out_fn = os.path.join(self.output_dn, "cd_diagram.png")
         Orange.evaluation.graph_ranks(avranks, names, cd=cd, width=12, textspace=2)
         plt.savefig(out_fn)
