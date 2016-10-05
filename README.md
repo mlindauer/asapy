@@ -27,9 +27,9 @@ To install all requirements, please run:
 
 If you do not use Anaconda or a virtual environment, you may want to add the option `--user` to install it in your user space.
 
-# USAGE
+## USAGE
 
-## Input Formats 
+### Input Formats 
 
 ASAPy reads two input formats: CSV and [ASlib](www.aslib.net).
 The CSV format is easier for new users but has some limitations to express all kind of input data.
@@ -40,7 +40,7 @@ One file with the performance data of each algorithm on each instance (each row 
 And another file with the instance features for each instance (each row an instance and each column an feature).
 All other meta-data (such as runtime cutoff) has to be specified by command line options (see `python scripts/asapy --help`).
 
-## CSV Interface
+### CSV Interface
 
 The performance matrix has to be passed by the option `--performance_csv [file name]` and the feature matrix by `--feature_csv [file name]`.
 Furthermore, you can specify the objective (running time or solution quality; `--objective`) , the running time cutoff (`runtime_cutoff`) and to maximize or minimize the objective (`--maximize`).
@@ -49,13 +49,13 @@ For example, a call could look like
 
 `python scripts/asapy --performance_csv [file name] --feature_csv [file name]`
 
-## ASlib Interface
+### ASlib Interface
 
 To use the full expressiveness of algorithm selection data, you can use the ASlib format by providing a folder with all files of an ASLib szenario.
 
 `python scripts/asapy --scenario [folder]`
 
-## Further Options
+### Further Options
 
 By default ASAPy writes into the current directory. But you can also redirect the output with the option `--output`. Please note that ASAPy generates a lot of plots. Depending on the number of algorithms in your data, ASAPy can generate more than 100MB.
 
