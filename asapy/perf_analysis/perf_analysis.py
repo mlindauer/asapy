@@ -345,7 +345,7 @@ class PerformanceAnalysis(object):
 
         for algorithm in self.scenario.algorithms:
             x, y = get_cdf_x_y(
-                self.scenario.performance_data[algorithm], max_val)
+                self.scenario.performance_data[str(algorithm)], max_val)
             x = np.array(x)
             y = np.array(y)
             x[x < min_val] = min_val
@@ -380,7 +380,8 @@ class PerformanceAnalysis(object):
         cutoff = self.scenario.algorithm_cutoff_time
         fig, ax = plt.subplots(nrows=1, ncols=1)
         all_data = self.scenario.performance_data.values
-        all_data[all_data > cutoff] = cutoff
+        if self.scenario.performance_type[0] == "runtime":
+            all_data[all_data > cutoff] = cutoff
 
         if self.scenario.performance_type[0] == "runtime":
             all_data = np.log10(all_data)
@@ -418,7 +419,8 @@ class PerformanceAnalysis(object):
         cutoff = self.scenario.algorithm_cutoff_time
         fig, ax = plt.subplots(nrows=1, ncols=1)
         all_data = self.scenario.performance_data.values
-        all_data[all_data > cutoff] = cutoff
+        if self.scenario.performance_type[0] == "runtime":
+            all_data[all_data > cutoff] = cutoff
 
         n_points = all_data.shape[0]
         all_data = [all_data[:, i] for i in range(all_data.shape[1])]
