@@ -8,6 +8,12 @@ Hence, ASAPy addresses two kinds of users:
 * Users of algorithm selection to get insights in their own data, to verify the correctness of the data and to understand how algorithm selection handles the data
 * Developers of algorithm selection tools to get better insights on what kind of data they operate
 
+## License
+
+This program is free software: you can redistribute it and/or modify it under the terms of the MIT license (please see the LICENSE file).
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+You should have received a copy of the MIT license along with this program (see LICENSE file). If not, see https://opensource.org/licenses/MIT.
+
 ## Installation
 
 ### Requirements
@@ -25,14 +31,14 @@ If you do not use Anaconda or a virtual environment, you may want to add the opt
 
 ## Input Formats 
 
-AutoFolio reads two input formats: CSV and [ASlib](www.aslib.net).
+ASAPy reads two input formats: CSV and [ASlib](www.aslib.net).
 The CSV format is easier for new users but has some limitations to express all kind of input data.
 The ASlib format has a higher expressiveness -- please see [www.aslib.net](www.aslib.net) for all details on this input format.
 
 For the CSV format, simply two files are required.
 One file with the performance data of each algorithm on each instance (each row an instance, and each column an algorithm).
 And another file with the instance features for each instance (each row an instance and each column an feature).
-All other meta-data (such as runtime cutoff) has to be specified by command line options (see `python3 scripts/autofolio --help`).
+All other meta-data (such as runtime cutoff) has to be specified by command line options (see `python scripts/asapy --help`).
 
 ## CSV Interface
 
