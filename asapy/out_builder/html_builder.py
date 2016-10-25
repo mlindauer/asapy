@@ -58,6 +58,7 @@ class HTMLBuilder(object):
 </head>
 <body>
 
+<script src="http://www.w3schools.com/lib/w3data.js"></script>
 <script src="js/lightbox-plus-jquery.min.js"></script>
 <header>
     <div class='l-wrapper'>    
@@ -160,8 +161,8 @@ for (i = 0; i < acc.length; i++) {
                 html_str +="</div>\n"
             elif k == "table":
                 html_str += "<div align=\"center\">\n{}\n</div>\n".format(v)
-            elif k == "tooltip":
-                pass #TODO
+            elif k == "html":
+                html_str += "<div align=\"center\" w3-include-html=\"{}\"><script>w3IncludeHTML();</script></div>\n".format(v)
         
         html_str += "</div>"
         return html_str

@@ -91,7 +91,8 @@ class ASAPy(object):
                                             "Correlation plot" : True,
                                             "Contribution of algorithms": True,
                                             "Critical Distance Diagram": True,
-                                            "Footprints": True
+                                            "Footprints": True,
+                                            "Instance Hardness": True
                                             },
                   "Feature Analysis": {"Status Bar Plot": True,
                                        "Violin and box plots":True,
@@ -147,7 +148,7 @@ class ASAPy(object):
                 "Please first read in Scenario data; use scenario input or csv input")
         if len(self.scenario.algorithms) > max_algos:
             n_prev_algos = len(self.scenario.algorithms)
-            self.logger.warn("We reduce the algorithms to the best %d algorithms" %(max_algos))
+            self.logger.warning("We reduce the algorithms to the best %d algorithms" %(max_algos))
             # we assume here that we talking about minimization of the performance values; should be ensured in the ASlib reader
             sorted_algos = list(self.scenario.performance_data.mean(axis=0).sort_values().index) 
             best_algos = sorted_algos[:max_algos]
@@ -244,7 +245,13 @@ class ASAPy(object):
                 for plot_tuple in footprints_plots:
                     key = "%s" % (plot_tuple[0])
                     data["Performance Analysis"]["Footprints"][
-                        key] = {"figure": plot_tuple[1]}
+                        key] = {"html": plot_tuple[1]}
+                        
+            # generate correlation plot
+            if config["Performance Analysis"].get("Instance Hardness"):
+                hardness_plot = pa.instance_hardness()
+                data["Performance Analysis"]["Instance Hardness"] = {"tooltip": "Projecting instances into 2d PCA feature space and encode the number of algorithms which perform within 5% of the oracle performance.",
+                                                                    "figure": hardness_plot}
      
 
         #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

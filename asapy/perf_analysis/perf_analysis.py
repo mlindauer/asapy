@@ -17,6 +17,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import pandas as pd
+import mpld3
 
 from plottingscripts.plotting.scatter import plot_scatter_plot
 
@@ -217,8 +218,6 @@ class PerformanceAnalysis(object):
             plt.axis('equal')
             ax = fig.gca()
             
-            from cycler import cycler
-
             colormap = plt.cm.gist_ncar
             colors = [colormap(i) for i in np.linspace(0, 0.9, len(self.scenario.algorithms))]
     
@@ -589,27 +588,105 @@ class PerformanceAnalysis(object):
         
         out_fns = []
         for algo in algorithms:
-            out_fn = os.path.join(self.output_dn, "footprint_%s.png" %(algo))
+            out_fn = os.path.join(self.output_dn, "footprint_%s.html" %(algo))
             
             algo_perf = performance_data[algo]
             if self.scenario.maximize[0] == False:
                 vbs_perfs = vbs_perf * (1+eps)
-                footprint = algo_perf <= vbs_perfs
+                footprint = (algo_perf <= vbs_perfs) & (self.scenario.runstatus_data[algo] == "ok")
             else:
-                vbs_perfs =  vbs_perf * (1-eps)
-                footprint = algo_perf >= vbs_perfs
+                vbs_perfs = vbs_perf * (1-eps)
+                footprint = (algo_perf >= vbs_perfs) & (self.scenario.runstatus_data[algo] == "ok")
             
-            plt.figure()
+            matplotlib.pyplot.close()
+            fig = plt.figure()
             
-            not_insts = features.loc[footprint[footprint==False].index.tolist()]
-            plt.scatter(not_insts[0], not_insts[1], c="black")
+            non_insts = footprint[footprint==False].index.tolist()
+            feature_not = features.loc[non_insts]
+            scatter = plt.scatter(feature_not[0], feature_not[1], c="black")
             
-            ok_insts = features.loc[footprint[footprint==True].index.tolist()]
-            plt.scatter(ok_insts[0], ok_insts[1], c="red")
+            tooltip = mpld3.plugins.PointHTMLTooltip(scatter, non_insts,
+                                                 voffset=10, hoffset=10)
+            mpld3.plugins.connect(fig, tooltip)
             
-            plt.tight_layout()
-            plt.savefig(out_fn, format="png")
+            ok_insts = footprint[footprint==True].index.tolist()
+            features_ok = features.loc[ok_insts]
+            scatter = plt.scatter(features_ok[0], features_ok[1], c="red")
+            
+            tooltip = mpld3.plugins.PointHTMLTooltip(scatter, ok_insts,
+                                                 voffset=10, hoffset=10)
+            mpld3.plugins.connect(fig, tooltip)
+            
+            #plt.tight_layout()
+            mpld3.save_html(fig,out_fn)
+            #plt.savefig(out_fn, format="png")
             
             out_fns.append([algo, out_fn])
             
         return out_fns
+    
+    def instance_hardness(self, eps=0.05):
+        '''
+            plot instances in 2d PCA feature space 
+            and color them according to number of algorithms that are at most eps% away from oralce score
+        '''
+        matplotlib.pyplot.close()
+        self.logger.info("Plotting Instance hardness........")
+        
+        self.scenario.feature_data = self.scenario.feature_data.fillna(
+            self.scenario.feature_data.mean())
+
+        # feature data
+        features = self.scenario.feature_data.values
+        insts = self.scenario.feature_data.index.tolist()
+
+        # scale features
+        ss = StandardScaler()
+        features = ss.fit_transform(features)
+
+        # feature reduction: pca
+        #TODO: use feature selection first to use only important features
+        pca = PCA(n_components=2)
+        features = pca.fit_transform(features)
+        features = pd.DataFrame(data=features, index=self.scenario.feature_data.index)
+        
+        performance_data = self.scenario.performance_data
+        
+        vbs_perf = performance_data.min(axis=1)
+        
+        algorithms = self.scenario.algorithms
+        
+        hardness_insts = pd.DataFrame(data=np.zeros((len(insts))), index=insts)
+        
+        for algo in algorithms:
+            out_fn = os.path.join(self.output_dn, "footprint_%s.html" %(algo))
+            
+            algo_perf = performance_data[algo]
+            if self.scenario.maximize[0] == False:
+                vbs_perfs = vbs_perf * (1+eps)
+                footprint = (algo_perf <= vbs_perfs) & (self.scenario.runstatus_data[algo] == "ok")
+            else:
+                vbs_perfs = vbs_perf * (1-eps)
+                footprint = (algo_perf >= vbs_perfs) & (self.scenario.runstatus_data[algo] == "ok")
+            
+            hardness_insts.loc[footprint[footprint].index.tolist()] += 1
+        
+        fig = plt.figure()
+        
+        colormap = plt.cm.gist_ncar
+        colors = [colormap(i) for i in np.linspace(0, 0.9, len(algorithms)+1)]
+        for i in range(len(algorithms)+1):    
+            insts = hardness_insts[(hardness_insts==float(i)).values].index.tolist()
+            f = features.loc[insts]
+            scatter = plt.scatter(f[0], f[1], color=colors[i])
+        
+        legend = ["%d" %(d) for d in range(len(algorithms)+1)]
+        plt.legend(legend, loc='center left', bbox_to_anchor=(1, 0.5))
+        
+        out_fn = os.path.join(self.output_dn, "instance_hardness.png")
+        plt.savefig(out_fn, bbox_inches='tight')
+        
+            
+        return out_fn
+        
+        
