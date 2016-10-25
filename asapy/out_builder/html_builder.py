@@ -162,7 +162,7 @@ for (i = 0; i < acc.length; i++) {
             elif k == "table":
                 html_str += "<div align=\"center\">\n{}\n</div>\n".format(v)
             elif k == "html":
-                html_str += "<div align=\"center\" w3-include-html=\"{}\"><script>w3IncludeHTML();</script></div>\n".format(v)
+                html_str += "<div align=\"center\"><iframe src='{}' frameborder='0' scrolling='no' width='700px' height='500px'></iframe></div>\n".format(v[len(self.output_dn):].lstrip("/"))
         
         html_str += "</div>"
         return html_str
