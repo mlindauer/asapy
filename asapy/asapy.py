@@ -196,13 +196,13 @@ class ASAPy(object):
             # get cdf plot
             if config["Performance Analysis"].get("CDF plot"):
                 cdf_plot = pa.get_cdf_plots()
-                data["Performance Analysis"]["CDF plot"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), how many of the instances (in percentage) can be solved. Better algorithms have a higher curve.",
+                data["Performance Analysis"]["CDF plot"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), how many of the instances (in percentage) can be solved. Better algorithms have a higher curve (for minimization problems).",
                                                         "figure": cdf_plot}
 
             # get cd diagram
             if config["Performance Analysis"].get("Critical Distance Diagram"):
                 cd_plot = pa.get_cd_diagram()
-                data["Performance Analysis"]["Critical Distance Diagram"] = {"tooltip": "Critical Distance diagram based on a Nemenyi two tailed test using average rankings. CD (top left) shows the critical distance. Distances larger than CD corresponds to a statistical significant difference in the ranking. We show only the best 20 ranked algorithms.",
+                data["Performance Analysis"]["Critical Distance Diagram"] = {"tooltip": "Critical Distance (CD) diagram based on a Nemenyi two tailed test using average rankings. CD (top left) shows the critical distance. Distances larger than CD corresponds to a statistical significant difference in the ranking. We show only the best 20 ranked algorithms.",
                                                         "figure": cd_plot}
 
      
@@ -261,13 +261,13 @@ class ASAPy(object):
             # feature importance
             if config["Feature Analysis"].get("Feature importance"):
                 importance_plot = fa.feature_importance()
-                data["Feature Analysis"]["Feature importance"] = {"tooltip": "Using the approach of SATZilla'11, we train a cost-sensitive random forest for each pair of algorithms and average the feature importance (using gini as splitting criterion) across all forests. We show only the 15 most important features. We show the median, 25th and 75th percentiles across all random forests.",
+                data["Feature Analysis"]["Feature importance"] = {"tooltip": "Using the approach of SATZilla'11, we train a cost-sensitive random forest for each pair of algorithms and average the feature importance (using gini as splitting criterion) across all forests. We show the median, 25th and 75th percentiles across all random forests of the 15 most important features.",
                                                             "figure": importance_plot}
      
             # cluster instances in feature space
             if config["Feature Analysis"].get("Clustering"):
                 cluster_plot = fa.cluster_instances()
-                data["Feature Analysis"]["Clustering"] = {"tooltip": "Similar to ISAC, we use a k-means to cluster the instances in the feature space. As pre-processing, we use standard scaling and pca to 2 dimensions. To guess the number of clusters, we use the silhouette score on the range of 2 to 12 in the number of clusters",
+                data["Feature Analysis"]["Clustering"] = {"tooltip": "Similar to ISAC, we use a k-means to cluster the instances in the feature space. As pre-processing, we use standard scaling and a PCA to 2 dimensions. To guess the number of clusters, we use the silhouette score on the range of 2 to 12 in the number of clusters",
                                                                 "figure": cluster_plot}
     
             # get cdf plot

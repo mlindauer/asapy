@@ -74,7 +74,7 @@ class HTMLBuilder(object):
 </div>
 <footer>        
     <div class='l-wrapper'>
-        Powered by <a href="http://www.coseal.net">COSEAL</a> and <a href="http://www.ml4aad.org">ML4AAD</a> 
+        Powered by <a href="http://www.coseal.net">COSEAL</a> and <a href="http://www.ml4aad.org">ML4AAD</a>  -- <a href="https://github.com/mlindauer/asapy">Open Source Code</a>
     </div>
 </footer>
 </body>
