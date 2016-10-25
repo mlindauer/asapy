@@ -563,6 +563,8 @@ class PerformanceAnalysis(object):
             i.e. all instances that can be solved within eps% of the VBS perf
         '''
         
+        self.logger.info("Plotting footprints........")
+        
         self.scenario.feature_data = self.scenario.feature_data.fillna(
             self.scenario.feature_data.mean())
 
@@ -581,18 +583,21 @@ class PerformanceAnalysis(object):
         
         performance_data = self.scenario.performance_data
         
-        if self.scenario.maximize[0] == True:
-            performance_data = performance_data * -1
-        
-        vbs_perfs = performance_data.min(axis=1) * (1+eps)
+        vbs_perf = performance_data.min(axis=1)
         
         algorithms = self.scenario.algorithms
         
         out_fns = []
         for algo in algorithms:
             out_fn = os.path.join(self.output_dn, "footprint_%s.png" %(algo))
+            
             algo_perf = performance_data[algo]
-            footprint = algo_perf <= vbs_perfs
+            if self.scenario.maximize[0] == False:
+                vbs_perfs = vbs_perf * (1+eps)
+                footprint = algo_perf <= vbs_perfs
+            else:
+                vbs_perfs =  vbs_perf * (1-eps)
+                footprint = algo_perf >= vbs_perfs
             
             plt.figure()
             
@@ -607,8 +612,4 @@ class PerformanceAnalysis(object):
             
             out_fns.append([algo, out_fn])
             
-        #undo
-        if self.scenario.maximize[0] == True:
-            performance_data = performance_data * -1
-        
         return out_fns

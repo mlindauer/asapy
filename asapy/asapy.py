@@ -239,7 +239,7 @@ class ASAPy(object):
             if config["Performance Analysis"].get("Footprints"):
                 footprints_plots = pa.get_footprints()
                 data["Performance Analysis"]["Footprints"] = OrderedDict({
-                    "tooltip": "Footprints of algorithms (at most 5% away from oracle performance) in 2-d PCA feature space. Inspired by [Smith-Miles et al. Computers & OR 2014]"})
+                    "tooltip": "Footprints of algorithms (instances red marked if the algorithm is at most 5% away from oracle performance) in 2-d PCA feature space. Inspired by [Smith-Miles et al. Computers & OR 2014]"})
                 footprints_plots  = sorted(footprints_plots, key=lambda x: x[0])
                 for plot_tuple in footprints_plots:
                     key = "%s" % (plot_tuple[0])
