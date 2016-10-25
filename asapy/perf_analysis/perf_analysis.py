@@ -535,6 +535,10 @@ class PerformanceAnalysis(object):
 
         MAX_ALGOS = 20 # orange allows unfortunately only 20 algorithms for cd diagrams
 
+        if self.scenario.maximize[0] == True:
+            # marginal contribution code assumes: smaller is better
+            self.scenario.performance_data = self.scenario.performance_data * -1
+
         matplotlib.pyplot.close()
         self.logger.info("Plotting critical distance plots........")
         names = list(self.scenario.performance_data.columns)     # labels of each technique
@@ -553,6 +557,11 @@ class PerformanceAnalysis(object):
         out_fn = os.path.join(self.output_dn, "cd_diagram.png")
         Orange.evaluation.graph_ranks(avranks, names, cd=cd, width=12, textspace=2)
         plt.savefig(out_fn)
+        
+        if self.scenario.maximize[0] == True:
+            # marginal contribution code assumes: smaller is better
+            self.scenario.performance_data = self.scenario.performance_data * -1
+        
         return out_fn
     
     def get_footprints(self, eps=0.05):
