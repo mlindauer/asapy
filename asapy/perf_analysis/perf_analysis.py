@@ -9,9 +9,14 @@ from scipy.misc import comb
 
 from pandas import DataFrame
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+import pandas as pd
 
 from plottingscripts.plotting.scatter import plot_scatter_plot
 
@@ -551,3 +556,59 @@ class PerformanceAnalysis(object):
         Orange.evaluation.graph_ranks(avranks, names, cd=cd, width=12, textspace=2)
         plt.savefig(out_fn)
         return out_fn
+    
+    def get_footprints(self, eps=0.05):
+        '''
+            computes the algorithm footprint in feature space,
+            i.e. all instances that can be solved within eps% of the VBS perf
+        '''
+        
+        self.scenario.feature_data = self.scenario.feature_data.fillna(
+            self.scenario.feature_data.mean())
+
+        # feature data
+        features = self.scenario.feature_data.values
+
+        # scale features
+        ss = StandardScaler()
+        features = ss.fit_transform(features)
+
+        # feature reduction: pca
+        #TODO: use feature selection first to use only important features
+        pca = PCA(n_components=2)
+        features = pca.fit_transform(features)
+        features = pd.DataFrame(data=features, index=self.scenario.feature_data.index)
+        
+        performance_data = self.scenario.performance_data
+        
+        if self.scenario.maximize[0] == True:
+            performance_data = performance_data * -1
+        
+        vbs_perfs = performance_data.min(axis=1) * (1+eps)
+        
+        algorithms = self.scenario.algorithms
+        
+        out_fns = []
+        for algo in algorithms:
+            out_fn = os.path.join(self.output_dn, "footprint_%s.png" %(algo))
+            algo_perf = performance_data[algo]
+            footprint = algo_perf <= vbs_perfs
+            
+            plt.figure()
+            
+            not_insts = features.loc[footprint[footprint==False].index.tolist()]
+            plt.scatter(not_insts[0], not_insts[1], c="black")
+            
+            ok_insts = features.loc[footprint[footprint==True].index.tolist()]
+            plt.scatter(ok_insts[0], ok_insts[1], c="red")
+            
+            plt.tight_layout()
+            plt.savefig(out_fn, format="png")
+            
+            out_fns.append([algo, out_fn])
+            
+        #undo
+        if self.scenario.maximize[0] == True:
+            performance_data = performance_data * -1
+        
+        return out_fns

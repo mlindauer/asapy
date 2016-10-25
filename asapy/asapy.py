@@ -91,6 +91,7 @@ class ASAPy(object):
                                             "Correlation plot" : True,
                                             "Contribution of algorithms": True,
                                             "Critical Distance Diagram": True,
+                                            "Footprints": True
                                             },
                   "Feature Analysis": {"Status Bar Plot": True,
                                        "Violin and box plots":True,
@@ -223,7 +224,7 @@ class ASAPy(object):
                 data["Performance Analysis"]["Correlation plot"] = {"tooltip": "Correlation based on Spearman Correlation Coefficient between all algorithms and clustered with Wards hierarchical clustering approach. Darker fields corresponds to a larger correlation between the algorithms.",
                                                                     "figure": correlation_plot}
      
-            # get shapley values
+            # get contribution values
             if config["Performance Analysis"].get("Contribution of algorithms"):
                 avg_fn, marg_fn, shap_fn = pa.get_contribution_values()
                 data["Performance Analysis"]["Contribution of algorithms"] = {"tooltip": "Contribution of each algorithm"}
@@ -233,6 +234,18 @@ class ASAPy(object):
                                                                                                                    "tooltip": "Marginal contribution to the virtual best solver (VBS, aka oracle) (i.e., how much decreases the VBS performance by removing the algorithm; higher value correspond to more importance). See [Xu et al SAT 2012]"}
                 data["Performance Analysis"]["Contribution of algorithms"]["Shapley Values"] = {"figure": shap_fn,
                                                                                                                    "tooltip": "Shapley values (i.e., marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance; see [Frechette et al AAAI'16]."}
+
+            # generate scatter plots
+            if config["Performance Analysis"].get("Footprints"):
+                footprints_plots = pa.get_footprints()
+                data["Performance Analysis"]["Footprints"] = OrderedDict({
+                    "tooltip": "Footprints of algorithms (at most 5% away from oracle performance) in 2-d PCA feature space. Inspired by [Smith-Miles et al. Computers & OR 2014]"})
+                footprints_plots  = sorted(footprints_plots, key=lambda x: x[0])
+                for plot_tuple in footprints_plots:
+                    key = "%s" % (plot_tuple[0])
+                    data["Performance Analysis"]["Footprints"][
+                        key] = {"figure": plot_tuple[1]}
+     
 
         #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         # feature analysis
