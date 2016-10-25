@@ -169,6 +169,7 @@ class PerformanceAnalysis(object):
         algorithms = self.scenario.algorithms
         instances = self.scenario.instances
         scenario = self.scenario
+        n_insts = len(scenario.instances)
         
         performance_data = scenario.performance_data
 
@@ -189,6 +190,7 @@ class PerformanceAnalysis(object):
                 return performance_data[algo][inst]
 
         shapleys = self._get_VBS_Shap(instances, algorithms, metric)
+        shapleys = dict((k,v/n_insts) for k,v in shapleys.items())
         if self.scenario.maximize[0] == False:
             performance_data = performance_data * -1
         
@@ -196,20 +198,56 @@ class PerformanceAnalysis(object):
             # marginal contribution code assumes: smaller is better
             self.scenario.performance_data = self.scenario.performance_data * -1
             
-        marginales = self._get_marginal_contribution() 
+        marginales = self._get_marginal_contribution()
         if self.scenario.maximize[0] == True:
             self.scenario.performance_data = self.scenario.performance_data * -1
             
         averages = self._get_average_perf()
 
-        data = np.zeros((len(algorithms), 3))
-        for indx, algo in enumerate(algorithms):
-            data[indx] = np.array(
-                [averages[algo], marginales[algo], shapleys[algo]])
-        df = DataFrame(data=data, index=algorithms, columns=[
-                       "Average Performance", "Marginal Contribution", "Shapley Values"])
+        out_fns = []
+        for name, data_ in zip(["averages","marginales", "shapleys"], [averages, marginales, shapleys]):
 
-        return df
+            matplotlib.pyplot.close()
+            fig = plt.figure()
+            plt.axis('equal')
+            ax = fig.gca()
+            
+            from cycler import cycler
+
+            colormap = plt.cm.gist_ncar
+            colors = [colormap(i) for i in np.linspace(0, 0.9, len(self.scenario.algorithms))]
+    
+            data_list = [data_[algo] for algo in algorithms]
+            
+            # automatically detect precision for legend
+            mean_v = np.mean(data_list)
+            prec = 2
+            while True:
+                if round(mean_v, prec) > 0:
+                    prec += 1
+                    break
+                prec += 1
+            print_str = "%s (%.{}f)".format(prec)
+            
+            # rescale to fix pie plot issues
+            sum_v = sum(data_.values())
+            data_list = [v / sum_v for v in data_list]
+            
+            labels = [print_str %(algo, data_[algo]) for algo in algorithms]            
+            patches, texts = plt.pie(data_list, colors=colors)
+            plt.legend(patches, labels, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+     
+            plt.tight_layout()
+            
+            out_fn = os.path.join(self.output_dn, "contribution_%s_pie_plot.png" %(name))
+            
+            plt.savefig(out_fn, facecolor='w', edgecolor='w',
+                        orientation='portrait', papertype=None, format=None,
+                        transparent=False, pad_inches=0.02, bbox_inches='tight')
+
+            out_fns.append(out_fn)
+
+        return out_fns
 
     def _get_average_perf(self):
         '''
@@ -232,12 +270,13 @@ class PerformanceAnalysis(object):
                 set(self.scenario.algorithms).difference([algorithm]))
             perf_data = self.scenario.performance_data[remaining_algos]
             rem_vbs = self.__get_vbs(perf_data)
-            marginales[algorithm] = rem_vbs - all_vbs 
+            print(rem_vbs - all_vbs)
+            marginales[algorithm] = rem_vbs - all_vbs
 
         return marginales
 
     def __get_vbs(self, performance_data):
-        return np.sum(performance_data.min(axis=1))
+        return np.mean(performance_data.min(axis=1))
 
     def _get_VBS_Shap(self, instances, algorithms, metric):
         '''

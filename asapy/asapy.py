@@ -170,7 +170,7 @@ class ASAPy(object):
                                      scenario=self.scenario)
             data["Performance Analysis"] = OrderedDict()
             if n_prev_algos is not None:
-                data["Performance Analysis"]["tooltip"] = "To provide a clear overview, we reduced the number of algorithms (%d) to the best %d algorithms on average" %(n_prev_algos, max_algos)
+                data["Performance Analysis"]["tooltip"] = "To provide a clear overview, we reduced the number of algorithms (%d) to the best %d algorithms on average." %(n_prev_algos, max_algos)
 
             if self.scenario.performance_type[0] == "solution_quality" and self.scenario.maximize[0]:
                 self.scenario.performance_data *= -1 # revoke inverting the performance as done in the scenario reader
@@ -225,9 +225,14 @@ class ASAPy(object):
      
             # get shapley values
             if config["Performance Analysis"].get("Contribution of algorithms"):
-                df_contributions = pa.get_contribution_values()
-                data["Performance Analysis"]["Contribution of algorithms"] = {"tooltip": "Contribution of each algorithm wrt to its average performance across all instances, the marginal contribution to the virtual best solver (VBS, aka oracle) (i.e., how much decreases the VBS performance by removing the algorithm; higher value correspond to more importance), and Shapley values (marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance; see Frechette et al AAAI'16).",
-                                                                          "table": df_contributions.to_html(formatters=["{0:.4f}".format,"{0:.4f}".format,"{0:.4f}".format])}
+                avg_fn, marg_fn, shap_fn = pa.get_contribution_values()
+                data["Performance Analysis"]["Contribution of algorithms"] = {"tooltip": "Contribution of each algorithm"}
+                
+                data["Performance Analysis"]["Contribution of algorithms"]["Average Performance"] = {"figure": avg_fn}
+                data["Performance Analysis"]["Contribution of algorithms"]["Marginal Contribution"] = {"figure": marg_fn,
+                                                                                                                   "tooltip": "Marginal contribution to the virtual best solver (VBS, aka oracle) (i.e., how much decreases the VBS performance by removing the algorithm; higher value correspond to more importance). See [Xu et al SAT 2012]"}
+                data["Performance Analysis"]["Contribution of algorithms"]["Shapley Values"] = {"figure": shap_fn,
+                                                                                                                   "tooltip": "Shapley values (i.e., marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance; see [Frechette et al AAAI'16]."}
 
         #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         # feature analysis
