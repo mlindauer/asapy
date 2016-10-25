@@ -274,7 +274,6 @@ class PerformanceAnalysis(object):
                 set(self.scenario.algorithms).difference([algorithm]))
             perf_data = self.scenario.performance_data[remaining_algos]
             rem_vbs = self.__get_vbs(perf_data)
-            print(rem_vbs - all_vbs)
             marginales[algorithm] = rem_vbs - all_vbs
 
         return marginales
