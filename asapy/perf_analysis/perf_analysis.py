@@ -567,7 +567,12 @@ class PerformanceAnalysis(object):
     def get_footprints(self, eps=0.05):
         '''
             computes the algorithm footprint in feature space,
-            i.e. all instances that can be solved within eps% of the VBS perf
+            i.e. all instances that can be solved within eps% of the VBS performance
+            
+            Arguments
+            ---------
+            eps: float
+                eps% threshold to VBS performance
         '''
         
         self.logger.info("Plotting footprints........")
@@ -596,7 +601,7 @@ class PerformanceAnalysis(object):
         
         out_fns = []
         for algo in algorithms:
-            out_fn = os.path.join(self.output_dn, "footprint_%s.html" %(algo))
+            out_fn = os.path.join(self.output_dn, "footprint_%s" %(algo.replace("/","_")))
             
             algo_perf = performance_data[algo]
             if self.scenario.maximize[0] == False:
@@ -625,11 +630,11 @@ class PerformanceAnalysis(object):
                                                  voffset=10, hoffset=10)
             mpld3.plugins.connect(fig, tooltip)
             
-            #plt.tight_layout()
-            mpld3.save_html(fig,out_fn)
-            #plt.savefig(out_fn, format="png")
+            mpld3.save_html(fig,out_fn+".html")
+            plt.tight_layout()
+            plt.savefig(out_fn+".png", format="png")
             
-            out_fns.append([algo, out_fn])
+            out_fns.append([algo, out_fn+".html", out_fn+".png"])
             
         return out_fns
     
@@ -682,19 +687,25 @@ class PerformanceAnalysis(object):
         fig = plt.figure()
         
         colormap = plt.cm.gist_ncar
-        colors = [colormap(i) for i in np.linspace(0, 0.9, len(algorithms)+1)]
+        colors = [colormap(i) for i in np.linspace(0.1, 0.9, len(algorithms)+1)]
         for i in range(len(algorithms)+1):    
             insts = hardness_insts[(hardness_insts==float(i)).values].index.tolist()
             f = features.loc[insts]
-            scatter = plt.scatter(f[0], f[1], color=colors[i])
+            scatter = plt.scatter(f[0], f[1], color=colors[i], edgecolors="black")
+            
+            tooltip = mpld3.plugins.PointHTMLTooltip(scatter, insts,
+                                                 voffset=10, hoffset=10)
+            mpld3.plugins.connect(fig, tooltip)
+            
+        
+        out_fn = os.path.join(self.output_dn, "instance_hardness")
+        mpld3.save_html(fig,out_fn+".html") #mpld3 does not support legends
         
         legend = ["%d" %(d) for d in range(len(algorithms)+1)]
         plt.legend(legend, loc='center left', bbox_to_anchor=(1, 0.5))
-        
-        out_fn = os.path.join(self.output_dn, "instance_hardness.png")
-        plt.savefig(out_fn, bbox_inches='tight')
+        plt.savefig(out_fn+".png", bbox_inches='tight')
         
             
-        return out_fn
+        return out_fn+".html", out_fn+".png" 
         
         

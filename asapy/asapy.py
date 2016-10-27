@@ -236,7 +236,7 @@ class ASAPy(object):
                 data["Performance Analysis"]["Contribution of algorithms"]["Shapley Values"] = {"figure": shap_fn,
                                                                                                                    "tooltip": "Shapley values (i.e., marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance; see [Frechette et al AAAI'16]."}
 
-            # generate scatter plots
+            # generate footprint plots
             if config["Performance Analysis"].get("Footprints"):
                 footprints_plots = pa.get_footprints()
                 data["Performance Analysis"]["Footprints"] = OrderedDict({
@@ -245,13 +245,14 @@ class ASAPy(object):
                 for plot_tuple in footprints_plots:
                     key = "%s" % (plot_tuple[0])
                     data["Performance Analysis"]["Footprints"][
-                        key] = {"html": plot_tuple[1]}
+                        key] = {"html": plot_tuple[1], "figure": plot_tuple[2]}
                         
-            # generate correlation plot
+            # generate instance hardness plot
             if config["Performance Analysis"].get("Instance Hardness"):
                 hardness_plot = pa.instance_hardness()
                 data["Performance Analysis"]["Instance Hardness"] = {"tooltip": "Projecting instances into 2d PCA feature space and encode the number of algorithms which perform within 5% of the oracle performance.",
-                                                                    "figure": hardness_plot}
+                                                                    "figure": hardness_plot[1],
+                                                                    "html": hardness_plot[0]}
      
 
         #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
