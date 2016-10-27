@@ -333,7 +333,7 @@ class FeatureAnalysis(object):
 
         ax1.grid(
             True, linestyle='-', which='major', color='lightgrey', alpha=0.5)
-        ax1.set_xlabel("Performance")
+        ax1.set_xlabel("Cost")
         ax1.set_ylabel("P(x<X)")
         ax1.set_xlim([min_val, max_val])
         ax1.set_xscale('log')
