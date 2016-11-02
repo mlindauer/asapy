@@ -192,7 +192,7 @@ class ASAPy(object):
             # get violin plot
             if config["Performance Analysis"].get("Violin plot"):
                 violion_plot = pa.get_violin_plots()
-                data["Performance Analysis"]["Violin plot"] = {"tooltip": "Violin plots to show the performance distribution of each algorithm",
+                data["Performance Analysis"]["Violin plot"] = {"tooltip": "Violin plots to show the probablity density of each algorithm's performance. Also showing the median (middle line) and min/max value.",
                                                            "figure": violion_plot}
      
             # get cdf plot
@@ -250,7 +250,7 @@ class ASAPy(object):
             # generate instance hardness plot
             if config["Performance Analysis"].get("Instance Hardness"):
                 hardness_plot = pa.instance_hardness()
-                data["Performance Analysis"]["Instance Hardness"] = {"tooltip": "Projecting instances into 2d PCA feature space and encode the number of algorithms which perform within 5% of the oracle performance.",
+                data["Performance Analysis"]["Instance Hardness"] = {"tooltip": "Projecting instances into 2d PCA feature space; the color encodes the number of algorithms that perform within 5% of the oracle performance.",
                                                                     "figure": hardness_plot[1],
                                                                     "html": hardness_plot[0]}
      
@@ -293,7 +293,7 @@ class ASAPy(object):
             # cluster instances in feature space
             if config["Feature Analysis"].get("Clustering"):
                 cluster_plot = fa.cluster_instances()
-                data["Feature Analysis"]["Clustering"] = {"tooltip": "Similar to ISAC, we use a k-means to cluster the instances in the feature space. As pre-processing, we use standard scaling and a PCA to 2 dimensions. To guess the number of clusters, we use the silhouette score on the range of 2 to 12 in the number of clusters",
+                data["Feature Analysis"]["Clustering"] = {"tooltip": "Clustering instances in 2d; the color encodes the cluster assigned to each cluster. Similar to ISAC, we use a k-means to cluster the instances in the feature space. As pre-processing, we use standard scaling and a PCA to 2 dimensions. To guess the number of clusters, we use the silhouette score on the range of 2 to 12 in the number of clusters",
                                                                 "figure": cluster_plot}
     
             # get cdf plot
