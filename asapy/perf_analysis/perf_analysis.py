@@ -601,7 +601,10 @@ class PerformanceAnalysis(object):
         
         performance_data = self.scenario.performance_data
         
-        vbs_perf = performance_data.min(axis=1)
+        if self.scenario.maximize[0] == False:
+            vbs_perf = performance_data.min(axis=1)
+        else:
+            vbs_perf = performance_data.max(axis=1)
         
         algorithms = self.scenario.algorithms
         
@@ -671,7 +674,10 @@ class PerformanceAnalysis(object):
         
         performance_data = self.scenario.performance_data
         
-        vbs_perf = performance_data.min(axis=1)
+        if self.scenario.maximize[0] == False:
+            vbs_perf = performance_data.min(axis=1)
+        else:
+            vbs_perf = performance_data.max(axis=1)
         
         algorithms = self.scenario.algorithms
         
