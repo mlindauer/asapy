@@ -198,7 +198,7 @@ class ASAPy(object):
             # get cdf plot
             if config["Performance Analysis"].get("CDF plot"):
                 cdf_plot = pa.get_cdf_plots()
-                data["Performance Analysis"]["CDF plot"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), how many of the instances (in percentage) can be solved. Better algorithms have a higher curve (for minimization problems).",
+                data["Performance Analysis"]["CDF plot"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), how many of the instances (in percentage) can be solved. Better algorithms have a higher curve for minimization problems.",
                                                         "figure": cdf_plot}
 
             # get cd diagram
@@ -222,7 +222,7 @@ class ASAPy(object):
             # generate correlation plot
             if config["Performance Analysis"].get("Correlation plot"):
                 correlation_plot = pa.correlation_plot()
-                data["Performance Analysis"]["Correlation plot"] = {"tooltip": "Correlation based on Spearman Correlation Coefficient between all algorithms and clustered with Wards hierarchical clustering approach. Darker fields corresponds to a larger correlation between the algorithms.",
+                data["Performance Analysis"]["Correlation plot"] = {"tooltip": "Correlation based on Spearman Correlation Coefficient between all algorithms and clustered with Wards hierarchical clustering approach. Darker fields corresponds to a larger correlation between the algorithms. See [Xu et al SAT 2012]",
                                                                     "figure": correlation_plot}
      
             # get contribution values
