@@ -483,7 +483,10 @@ class PerformanceAnalysis(object):
         labels = ax.get_xticklabels()
         plt.setp(labels, rotation=45, fontsize=12, ha="right")
 
-        plt.tight_layout()
+        try:
+            plt.tight_layout()
+        except ValueError:
+            pass
 
         out_fn = os.path.join(self.output_dn, "box_plot.png")
         plt.savefig(out_fn)
@@ -522,7 +525,10 @@ class PerformanceAnalysis(object):
         lgd = plt.legend(list(map(lambda x: x[0], plots)), stati, bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
                          ncol=3, mode="expand", borderaxespad=0.)
 
-        plt.tight_layout()
+        try:
+            plt.tight_layout()
+        except ValueError:
+            pass
         out_fn = os.path.join(self.output_dn, "status_bar_plot.png")
         plt.savefig(out_fn, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
@@ -596,7 +602,10 @@ class PerformanceAnalysis(object):
         
         performance_data = self.scenario.performance_data
         
-        vbs_perf = performance_data.min(axis=1)
+        if self.scenario.maximize[0] == False:
+            vbs_perf = performance_data.min(axis=1)
+        else:
+            vbs_perf = performance_data.max(axis=1)
         
         algorithms = self.scenario.algorithms
         
@@ -666,7 +675,10 @@ class PerformanceAnalysis(object):
         
         performance_data = self.scenario.performance_data
         
-        vbs_perf = performance_data.min(axis=1)
+        if self.scenario.maximize[0] == False:
+            vbs_perf = performance_data.min(axis=1)
+        else:
+            vbs_perf = performance_data.max(axis=1)
         
         algorithms = self.scenario.algorithms
         
