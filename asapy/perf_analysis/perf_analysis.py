@@ -269,6 +269,7 @@ class PerformanceAnalysis(object):
         '''
         marginales = {}
         all_vbs = self.__get_vbs(self.scenario.performance_data)
+        self.logger.info("VBS: %f" %(all_vbs))
         for algorithm in self.scenario.algorithms:
             remaining_algos = list(
                 set(self.scenario.algorithms).difference([algorithm]))
