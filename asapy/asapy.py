@@ -92,7 +92,8 @@ class ASAPy(object):
                                             "Contribution of algorithms": True,
                                             "Critical Distance Diagram": True,
                                             "Footprints": True,
-                                            "Instance Hardness": True
+                                            "Instance Hardness": True,
+                                            "Baselines": True
                                             },
                   "Feature Analysis": {"Status Bar Plot": True,
                                        "Violin and box plots":True,
@@ -146,12 +147,18 @@ class ASAPy(object):
         if self.scenario is None:
             raise ValueError(
                 "Please first read in Scenario data; use scenario input or csv input")
+            
+        if self.scenario.performance_type[0] == "solution_quality" and self.scenario.maximize[0]:
+            self.scenario.performance_data *= -1 # revoke inverting the performance as done in the scenario reader
+            self.logger.info("Revoke * -1 on performance data")
+        
         if len(self.scenario.algorithms) > max_algos:
             n_prev_algos = len(self.scenario.algorithms)
-            self.logger.warning("We reduce the algorithms to the best %d algorithms" %(max_algos))
-            # we assume here that we talking about minimization of the performance values; should be ensured in the ASlib reader
-            sorted_algos = list(self.scenario.performance_data.mean(axis=0).sort_values().index) 
-            best_algos = sorted_algos[:max_algos]
+            self.logger.warning("We reduce the algorithms to the greedy selected VBS-improving algorithms (at most %d)" %(max_algos))
+            pa = PerformanceAnalysis(output_dn=self.output_dn,
+                                     scenario=self.scenario)
+            
+            best_algos = pa.reduce_algos(max_algos=max_algos)
             self.scenario.algorithms = best_algos
             self.scenario.performance_data = self.scenario.performance_data[best_algos]
             self.scenario.runstatus_data = self.scenario.runstatus_data[best_algos]
@@ -172,11 +179,13 @@ class ASAPy(object):
                                      scenario=self.scenario)
             data["Performance Analysis"] = OrderedDict()
             if n_prev_algos is not None:
-                data["Performance Analysis"]["tooltip"] = "To provide a clear overview, we reduced the number of algorithms (%d) to the best %d algorithms on average." %(n_prev_algos, max_algos)
+                data["Performance Analysis"]["tooltip"] = "To provide a clear overview, we reduced the number of algorithms (%d) to the greedily selected most VBS-improving %d algorithms." %(n_prev_algos, len(self.scenario.algorithms))
 
-            if self.scenario.performance_type[0] == "solution_quality" and self.scenario.maximize[0]:
-                self.scenario.performance_data *= -1 # revoke inverting the performance as done in the scenario reader
-                self.logger.info("Revoke * -1 on performance data")
+            if config["Performance Analysis"].get("Baselines"):
+                baseline_table = pa.get_baselines()
+                data["Performance Analysis"]["Baselines"] = {"tooltip": "Baslines: Best Single Algorithm (i.e., best algorithm on average across instances), Virtual Best Solver (aka Oracle, i.e., average across best performance per instance; theoretical best algorithm selector)",
+                                                                   "table": baseline_table}
+     
     
             if config["Performance Analysis"].get("Status bar plot"):
                 status_plot = pa.get_bar_status_plot()

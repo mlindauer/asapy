@@ -13,6 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
 import matplotlib
+from rope.refactor.multiproject import perform
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -49,6 +50,67 @@ class PerformanceAnalysis(object):
         self.output_dn = os.path.join(output_dn, "performance_plots")
         if not os.path.isdir(self.output_dn):
             os.mkdir(self.output_dn)
+            
+    def reduce_algos(self, max_algos:int):
+        '''
+            use a greedy forward search wrt VBS performance
+            to shrink the set of algorithms to max_algos
+        '''
+        performance_data = self.scenario.performance_data
+        
+        if self.scenario.maximize[0]:
+            performance_data *= -1
+        
+        bsa = performance_data.mean(axis=0).idxmin()
+        selected_algos = [bsa]
+        remaining_algos = set(self.scenario.algorithms)
+        remaining_algos.remove(bsa)
+        for i in range(1,max_algos):
+            best_algo = [None,self.__get_vbs(performance_data=performance_data[selected_algos])]
+            for algo in remaining_algos:
+                selected_algos.append(algo)
+                vbs = self.__get_vbs(performance_data=performance_data[selected_algos])
+                selected_algos.remove(algo)
+                if vbs < best_algo[1]:
+                    best_algo = [algo, vbs]
+            if best_algo[0] is None:
+                break
+            selected_algos.append(best_algo[0])
+            remaining_algos.remove(best_algo[0])
+            self.logger.debug(best_algo)
+        
+        self.logger.warning("We lost because of algorithm filtering %f of VBS estimate" %(best_algo[1] - self.__get_vbs(performance_data=performance_data)))
+                
+        if self.scenario.maximize[0]:
+            performance_data *= -1
+            
+        return selected_algos
+
+    def get_baselines(self):
+        '''
+            get baselines: best single algorithm and VBS
+            
+            Returns
+            -------
+            str
+                html table with entries for bsa and vbs
+        '''
+        performance_data = self.scenario.performance_data
+        
+        if self.scenario.maximize[0]:
+            maxis = performance_data.max(axis=1)
+            vbs_score = np.mean(performance_data.max(axis=1))
+            algo_perfs = performance_data.mean(axis=0)
+            best_indx = algo_perfs.idxmax()
+            bsa = algo_perfs[best_indx]
+        else:
+            vbs_score = np.mean(performance_data.min(axis=1))
+            algo_perfs = performance_data.mean(axis=0)
+            best_indx = algo_perfs.idxmin()
+            bsa = algo_perfs[best_indx]    
+            
+        df = DataFrame(data=[[vbs_score], [bsa]], index=["Virtual Best Algorithm", "Best Single Algorithm (%s)" %(best_indx)])
+        return df.to_html(header=False)
 
     def scatter_plots(self):
         '''
