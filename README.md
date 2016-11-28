@@ -77,6 +77,27 @@ you can use a json-formatted configuration file. To get a template for the confi
 }
 ```
 
+## Examples
+
+[ASP-POTASSCO](aad.informatik.uni-freiburg.de/~lindauer/asapy/ASP-POTASSCO/report.html)
+[BNSL-2016](aad.informatik.uni-freiburg.de/~lindauer/asapy/BNSL-2016/report.html)
+[CPMP-2015](aad.informatik.uni-freiburg.de/~lindauer/asapy/CPMP-2015/report.html)
+[CSP-2010](aad.informatik.uni-freiburg.de/~lindauer/asapy/CSP-2010/report.html)
+[CSP-MZN-2013](aad.informatik.uni-freiburg.de/~lindauer/asapy/CSP-MZN-2013/report.html)
+[MAXSAT12-PMS](aad.informatik.uni-freiburg.de/~lindauer/asapy/MAXSAT12-PMS/report.html)
+[MAXSAT15-PMS-INDU](aad.informatik.uni-freiburg.de/~lindauer/asapy/MAXSAT15-PMS-INDU/report.html)
+[PROTEUS-2014](aad.informatik.uni-freiburg.de/~lindauer/asapy/PROTEUS-2014/report.html)
+[QBF-2011](aad.informatik.uni-freiburg.de/~lindauer/asapy/QBF-2011/report.html)
+[QBF-2014](aad.informatik.uni-freiburg.de/~lindauer/asapy/QBF-2014/report.html)
+[SAT11-HAND](aad.informatik.uni-freiburg.de/~lindauer/asapy/SAT11-HAND/report.html)
+[SAT11-INDU](aad.informatik.uni-freiburg.de/~lindauer/asapy/SAT11-INDU/report.html)
+[SAT11-RAND](aad.informatik.uni-freiburg.de/~lindauer/asapy/SAT11-RAND/report.html)
+[SAT12-ALL](aad.informatik.uni-freiburg.de/~lindauer/asapy/SAT12-ALL/report.html)
+[SAT12-HAND](aad.informatik.uni-freiburg.de/~lindauer/asapy/SAT12-HAND/report.html)
+[SAT12-INDU](aad.informatik.uni-freiburg.de/~lindauer/asapy/SAT12-INDU/report.html)
+[SAT12-RAND](aad.informatik.uni-freiburg.de/~lindauer/asapy/SAT12-RAND/report.html)
+[SAT15-INDU](aad.informatik.uni-freiburg.de/~lindauer/asapy/SAT15-INDU/report.html)
+
 ## Contact
 
 Marius Lindauer: lindauer@cs.uni-freiburg.de
