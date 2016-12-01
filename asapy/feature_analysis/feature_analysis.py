@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 from plottingscripts.plotting.scatter import plot_scatter_plot
 
-from autofolio.data.aslib_scenario import ASlibScenario
+from aslib_scenario.aslib_scenario import ASlibScenario
 from autofolio.selector.pairwise_classification import PairwiseClassifier
 from autofolio.selector.classifiers.random_forest import RandomForest
 

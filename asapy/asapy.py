@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 from plottingscripts.plotting.scatter import plot_scatter_plot
 
-from autofolio.data.aslib_scenario import ASlibScenario
+from aslib_scenario.aslib_scenario import ASlibScenario
 
 from asapy.perf_analysis.perf_analysis import PerformanceAnalysis
 from asapy.feature_analysis.feature_analysis import FeatureAnalysis

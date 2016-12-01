@@ -22,7 +22,7 @@ import mpld3
 
 from plottingscripts.plotting.scatter import plot_scatter_plot
 
-from autofolio.data.aslib_scenario import ASlibScenario
+from aslib_scenario.aslib_scenario import ASlibScenario
 
 from asapy.utils.util_funcs import get_cdf_x_y
 
