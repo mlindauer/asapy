@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 from scipy.stats import spearmanr
-from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import linkage, dendrogram
 from scipy.misc import comb
 
 from pandas import DataFrame
@@ -176,6 +176,14 @@ class PerformanceAnalysis(object):
                 data[j, i] = rho
 
         link = linkage(data * -1, 'ward')  # input is distance -> * -1
+        
+        # plot clustering
+        fig, ax = plt.subplots()
+        dendrogram(link, labels=algos, orientation='right')
+        out_plot = os.path.join(self.output_dn, "algo_clustering.png")
+        plt.savefig(out_plot, format="png")
+        matplotlib.pyplot.close()
+        
 
         sorted_algos = [[a] for a in algos]
         for l in link:
@@ -258,7 +266,7 @@ class PerformanceAnalysis(object):
                 return performance_data[algo][inst]
 
         shapleys = self._get_VBS_Shap(instances, algorithms, metric)
-        shapleys = dict((k,v/n_insts) for k,v in shapleys.items())
+        #shapleys = dict((k,v/n_insts) for k,v in shapleys.items())
         if self.scenario.maximize[0] == False:
             performance_data = performance_data * -1
         
@@ -387,8 +395,8 @@ class PerformanceAnalysis(object):
 
                 metricvalue = metric(ialgorithm, instance)
                 # normalised as fraction of instances
-                #value = 1/float(m)*metricvalue
-                value = metricvalue
+                value = 1/float(m)*metricvalue
+                #value = metricvalue
                 #print >> sys.stderr, 'Value of this rule : 1/%d * %.4f = %.4f' % (m,metricvalue,value)
 
                 # Calculate the rule Shapley values, and add them to the global
@@ -710,7 +718,7 @@ class PerformanceAnalysis(object):
             
         return out_fns
     
-    def instance_hardness(self, eps=0.05):
+    def instance_hardness(self, eps=0.01):
         '''
             plot instances in 2d PCA feature space 
             and color them according to number of algorithms that are at most eps% away from oralce score
@@ -776,8 +784,9 @@ class PerformanceAnalysis(object):
         out_fn = os.path.join(self.output_dn, "instance_hardness")
         mpld3.save_html(fig,out_fn+".html") #mpld3 does not support legends
         
-        legend = ["%d" %(d) for d in range(len(algorithms)+1)]
-        plt.legend(legend, loc='center left', bbox_to_anchor=(1, 0.5))
+        #legend = ["%d" %(d) for d in range(len(algorithms)+1)]
+        #plt.legend(legend, loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.colorbar(scatter)
         plt.savefig(out_fn+".png", bbox_inches='tight')
         
             
