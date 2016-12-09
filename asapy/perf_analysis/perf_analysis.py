@@ -294,7 +294,7 @@ class PerformanceAnalysis(object):
             data_list = [data_[algo] for algo in algorithms]
             
             # automatically detect precision for legend
-            mean_v = np.mean(data_list)
+            mean_v = np.abs(np.mean(data_list))
             prec = 2
             while True:
                 if round(mean_v, prec) > 0:
