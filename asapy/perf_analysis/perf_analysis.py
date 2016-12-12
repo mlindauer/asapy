@@ -773,23 +773,29 @@ class PerformanceAnalysis(object):
         
         fig = plt.figure()
         
-        colormap = plt.cm.gist_ncar
-        colors = [colormap(i) for i in np.linspace(0.1, 0.9, len(algorithms)+1)]
+        x = []
+        y = []
+        c = []
+        insts_all = []
         for i in range(len(algorithms)+1):    
             insts = hardness_insts[(hardness_insts==float(i)).values].index.tolist()
             f = features.loc[insts]
-            scatter = plt.scatter(f[0], f[1], color=colors[i], edgecolors="black")
+            x.extend(f[0])
+            y.extend(f[1])
+            c.extend([i]*len(insts))
+            insts_all.extend(insts)
             
-            tooltip = mpld3.plugins.PointHTMLTooltip(scatter, insts,
-                                                 voffset=10, hoffset=10)
-            mpld3.plugins.connect(fig, tooltip)
-            
+        scatter = plt.scatter(x, y, c=c, vmin=1, vmax=len(algorithms), edgecolors="black", cmap=plt.cm.jet)
         
         out_fn = os.path.join(self.output_dn, "instance_hardness")
+         
+        tooltip = mpld3.plugins.PointHTMLTooltip(scatter, insts_all,
+                                                 voffset=10, hoffset=10)
+        mpld3.plugins.connect(fig, tooltip)            
+         
+        
         mpld3.save_html(fig,out_fn+".html") #mpld3 does not support legends
         
-        #legend = ["%d" %(d) for d in range(len(algorithms)+1)]
-        #plt.legend(legend, loc='center left', bbox_to_anchor=(1, 0.5))
         plt.colorbar(scatter)
         plt.savefig(out_fn+".png", bbox_inches='tight')
         
