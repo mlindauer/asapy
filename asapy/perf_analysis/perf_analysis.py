@@ -250,10 +250,12 @@ class PerformanceAnalysis(object):
         performance_data = scenario.performance_data
 
 
-        if self.scenario.maximize[0] == False:
-            # Shapley code assumes higher is better
+        if self.scenario.maximize[0] == True:
+            # Assume minimization
             performance_data = performance_data * -1 
 
+        max_perf = performance_data.max().max()
+        
         is_time_scenario = self.scenario.performance_type[0] == "runtime"
 
         def metric(algo, inst):
@@ -263,12 +265,14 @@ class PerformanceAnalysis(object):
                         performance_data[algo][inst])
                 return perf
             else:
-                return performance_data[algo][inst]
+                return max_perf - performance_data[algo][inst]
 
         shapleys = self._get_VBS_Shap(instances, algorithms, metric)
         #shapleys = dict((k,v/n_insts) for k,v in shapleys.items())
-        if self.scenario.maximize[0] == False:
+        
+        if self.scenario.maximize[0] == True:
             performance_data = performance_data * -1
+            
         
         if self.scenario.maximize[0] == True:
             # marginal contribution code assumes: smaller is better

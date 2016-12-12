@@ -243,7 +243,7 @@ class ASAPy(object):
                 data["Performance Analysis"]["Contribution of algorithms"]["Marginal Contribution"] = {"figure": marg_fn,
                                                                                                                    "tooltip": "Marginal contribution to the virtual best solver (VBS, aka oracle) (i.e., how much decreases the VBS performance by removing the algorithm; higher value correspond to more importance). See [Xu et al SAT 2012]"}
                 data["Performance Analysis"]["Contribution of algorithms"]["Shapley Values"] = {"figure": shap_fn,
-                                                                                                                   "tooltip": "Shapley values (i.e., marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance; see [Frechette et al AAAI'16]."}
+                                                                                                                   "tooltip": "Shapley values (i.e., marginal contribution across all possible subsets of portfolios; again higher values corresponds to more importance; see [Frechette et al AAAI'16]. For running time scenarios, the metric is cutoff - running time; for non-running time, the metric is (worst performance across all instances and algorithms)- performance."}
 
             # generate footprint plots
             if config["Performance Analysis"].get("Footprints"):
