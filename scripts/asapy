@@ -56,7 +56,7 @@ if args_.scenario:
 	
 elif args_.performance_csv:
 	CSV_Data = namedtuple("CSV_Data", ["perf_csv", "feat_csv", "obj", "cutoff", "maximize"])
-	csv_data = CSV_Data(args_.performance_csv, args_.feature_csv, args_.objective, args_.runtime_cutoff, args._maximize)
+	csv_data = CSV_Data(args_.performance_csv, args_.feature_csv, args_.objective, args_.runtime_cutoff, args_.maximize)
 	asapy.read_scenario_CSV(csv_data)
 
 asapy.main(config, args_.max_algos)
