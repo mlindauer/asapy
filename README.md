@@ -18,7 +18,7 @@ You should have received a copy of the MIT license along with this program (see 
 
 ### Requirements
 
-ASAPy runs with '''Python 3.5'''.
+ASAPy runs with '''Python 3.5''' and we recommend to use a Linux OS (e.g. Ubuntu) -- we cannot give support for MacOS or Windows.
 Many of its dependencies can be fulfilled by using [Anaconda 3.4](https://www.continuum.io/).  
 
 To install all requirements, please run:
@@ -26,6 +26,8 @@ To install all requirements, please run:
 `pip install -r requirements.txt`
 
 If you do not use Anaconda or a virtual environment, you may want to add the option `--user` to install it in your user space.
+
+If the installation of `autofolio` fails, please try to install `autofolio` first and then `asapy`.
 
 ## USAGE
 
