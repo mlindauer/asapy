@@ -517,9 +517,14 @@ class PerformanceAnalysis(object):
 
         return out_fn
 
-    def get_violin_plots(self):
+    def get_violin_plots(self, plot_log_perf: bool=False):
         '''
             compute violin plots (fancy box plots) for each algorithm
+            
+            Arguments
+            ---------
+            plot_log_perf: bool
+                plot perf on log scale
         '''
         matplotlib.pyplot.close()
         self.logger.info("Plotting vilion plots........")
@@ -530,7 +535,7 @@ class PerformanceAnalysis(object):
         if self.scenario.performance_type[0] == "runtime":
             all_data[all_data > cutoff] = cutoff
 
-        if self.scenario.performance_type[0] == "runtime":
+        if self.scenario.performance_type[0] == "runtime" or plot_log_perf:
             all_data = np.log10(all_data)
             y_label = "log(%s)" % (self.scenario.performance_type[0])
         else:

@@ -201,7 +201,7 @@ class ASAPy(object):
      
             # get violin plot
             if config["Performance Analysis"].get("Violin plot"):
-                violion_plot = pa.get_violin_plots()
+                violion_plot = pa.get_violin_plots(plot_log_perf=self.plot_log_perf)
                 data["Performance Analysis"]["Violin plot"] = {"tooltip": "Violin plots to show the probablity density of each algorithm's performance. Also showing the median (middle line) and min/max value.",
                                                            "figure": violion_plot}
      
