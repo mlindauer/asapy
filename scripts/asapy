@@ -28,6 +28,7 @@ csv.add_argument("--objective", default="solution_quality", choices=[
 csv.add_argument("--runtime_cutoff", default=None, type=float,
                  help="cutoff time for each algorithm run for the performance data")
 csv.add_argument("--maximize", default=False, action="store_true", help="Set this parameter to indicate maximization of the performance metric (default: minimization)")
+csv.add_argument("--plot_log_perf", default=False, action="store_true", help="Plot performance on a log scale (in some plots); default on some plots if running time is the used metric")
 
 optional = parser.add_argument_group("Optional Arguments")
 optional.add_argument("--output", default=".", help="output directory")
@@ -40,7 +41,7 @@ args_ = parser.parse_args()
 
 logging.basicConfig(level=args_.verbose)
 
-asapy = ASAPy(output_dn=args_.output)
+asapy = ASAPy(output_dn=args_.output, plot_log_perf=args_.plot_log_perf)
 
 if args_.print_config:
 	asapy.print_config()

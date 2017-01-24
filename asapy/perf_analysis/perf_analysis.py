@@ -16,6 +16,7 @@ import matplotlib
 from rope.refactor.multiproject import perform
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import tight_layout, figure, subplot, savefig, show, setp
 
 import pandas as pd
 import mpld3
@@ -50,26 +51,28 @@ class PerformanceAnalysis(object):
         self.output_dn = os.path.join(output_dn, "performance_plots")
         if not os.path.isdir(self.output_dn):
             os.mkdir(self.output_dn)
-            
-    def reduce_algos(self, max_algos:int):
+
+    def reduce_algos(self, max_algos: int):
         '''
             use a greedy forward search wrt VBS performance
             to shrink the set of algorithms to max_algos
         '''
         performance_data = self.scenario.performance_data
-        
+
         if self.scenario.maximize[0]:
             performance_data *= -1
-        
+
         bsa = performance_data.mean(axis=0).idxmin()
         selected_algos = [bsa]
         remaining_algos = set(self.scenario.algorithms)
         remaining_algos.remove(bsa)
-        for i in range(1,max_algos):
-            best_algo = [None,self.__get_vbs(performance_data=performance_data[selected_algos])]
+        for i in range(1, max_algos):
+            best_algo = [
+                None, self.__get_vbs(performance_data=performance_data[selected_algos])]
             for algo in remaining_algos:
                 selected_algos.append(algo)
-                vbs = self.__get_vbs(performance_data=performance_data[selected_algos])
+                vbs = self.__get_vbs(
+                    performance_data=performance_data[selected_algos])
                 selected_algos.remove(algo)
                 if vbs < best_algo[1]:
                     best_algo = [algo, vbs]
@@ -78,25 +81,26 @@ class PerformanceAnalysis(object):
             selected_algos.append(best_algo[0])
             remaining_algos.remove(best_algo[0])
             self.logger.debug(best_algo)
-        
-        self.logger.warning("We lost because of algorithm filtering %f of VBS estimate" %(best_algo[1] - self.__get_vbs(performance_data=performance_data)))
-                
+
+        self.logger.warning("We lost because of algorithm filtering %f of VBS estimate" % (
+            best_algo[1] - self.__get_vbs(performance_data=performance_data)))
+
         if self.scenario.maximize[0]:
             performance_data *= -1
-            
+
         return selected_algos
 
     def get_baselines(self):
         '''
             get baselines: best single algorithm and VBS
-            
+
             Returns
             -------
             str
                 html table with entries for bsa and vbs
         '''
         performance_data = self.scenario.performance_data
-        
+
         if self.scenario.maximize[0]:
             maxis = performance_data.max(axis=1)
             vbs_score = np.mean(performance_data.max(axis=1))
@@ -107,15 +111,21 @@ class PerformanceAnalysis(object):
             vbs_score = np.mean(performance_data.min(axis=1))
             algo_perfs = performance_data.mean(axis=0)
             best_indx = algo_perfs.idxmin()
-            bsa = algo_perfs[best_indx]    
-            
-        df = DataFrame(data=[[vbs_score], [bsa]], index=["Virtual Best Algorithm", "Best Single Algorithm (%s)" %(best_indx)])
+            bsa = algo_perfs[best_indx]
+
+        df = DataFrame(data=[[vbs_score], [bsa]], index=[
+                       "Virtual Best Algorithm", "Best Single Algorithm (%s)" % (best_indx)])
         return df.to_html(header=False)
 
-    def scatter_plots(self):
+    def scatter_plots(self, plot_log_perf: bool=False):
         '''
             generate scatter plots of all pairs of algorithms in the performance data of the scenario
             and save them in the output directory
+
+            Arguments
+            ---------
+            plot_log_perf: bool
+                plot perf on log scale
 
             Returns
             -------
@@ -142,9 +152,22 @@ class PerformanceAnalysis(object):
 
                 matplotlib.pyplot.close()
 
-                fig = plot_scatter_plot(x_data=y_i, y_data=y_j, max_val=max_val,
-                                        labels=[algo_1, algo_2],
-                                        metric=self.scenario.performance_type[0])
+                if self.scenario.performance_type[0] == "runtime":
+                    fig = plot_scatter_plot(x_data=y_i, y_data=y_j, max_val=max_val,
+                                            labels=[algo_1, algo_2],
+                                            metric=self.scenario.performance_type[0])
+                else:
+                    fig = figure(1, dpi=100)
+                    ax1 = subplot(aspect='equal')
+                    ax1.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.5)
+                    ax1.scatter(y_i, y_j, marker='x', c='black')
+                    ax1.set_xlabel(algo_1, fontsize=20)
+                    ax1.set_ylabel(algo_2, fontsize=20)
+                    if plot_log_perf:
+                        ax1.set_xscale("log")
+                        ax1.set_yscale("log")
+                    fig.tight_layout()
+                    
                 out_name = os.path.join(self.output_dn,
                                         "scatter_%s_%s.png" % (algo_1.replace("/", "_"), algo_2.replace("/", "_")))
                 fig.savefig(out_name)
@@ -176,14 +199,13 @@ class PerformanceAnalysis(object):
                 data[j, i] = rho
 
         link = linkage(data * -1, 'ward')  # input is distance -> * -1
-        
+
         # plot clustering
         fig, ax = plt.subplots()
         dendrogram(link, labels=algos, orientation='right')
         out_plot = os.path.join(self.output_dn, "algo_clustering.png")
         plt.savefig(out_plot, format="png")
         matplotlib.pyplot.close()
-        
 
         sorted_algos = [[a] for a in algos]
         for l in link:
@@ -239,23 +261,22 @@ class PerformanceAnalysis(object):
             ------
             pandas.DataFrame() with columns being "Average Performance", "Marginal Performance", "Shapley Values" and indexes being the algorithms
         '''
-        
+
         self.logger.info("Get contribution scores........")
 
         algorithms = self.scenario.algorithms
         instances = self.scenario.instances
         scenario = self.scenario
         n_insts = len(scenario.instances)
-        
-        performance_data = scenario.performance_data
 
+        performance_data = scenario.performance_data
 
         if self.scenario.maximize[0] == True:
             # Assume minimization
-            performance_data = performance_data * -1 
+            performance_data = performance_data * -1
 
         max_perf = performance_data.max().max()
-        
+
         is_time_scenario = self.scenario.performance_type[0] == "runtime"
 
         def metric(algo, inst):
@@ -269,34 +290,36 @@ class PerformanceAnalysis(object):
 
         shapleys = self._get_VBS_Shap(instances, algorithms, metric)
         #shapleys = dict((k,v/n_insts) for k,v in shapleys.items())
-        
+
         if self.scenario.maximize[0] == True:
             performance_data = performance_data * -1
-            
-        
+
         if self.scenario.maximize[0] == True:
             # marginal contribution code assumes: smaller is better
-            self.scenario.performance_data = self.scenario.performance_data * -1
-            
+            self.scenario.performance_data = self.scenario.performance_data * - \
+                1
+
         marginales = self._get_marginal_contribution()
         if self.scenario.maximize[0] == True:
-            self.scenario.performance_data = self.scenario.performance_data * -1
-            
+            self.scenario.performance_data = self.scenario.performance_data * - \
+                1
+
         averages = self._get_average_perf()
 
         out_fns = []
-        for name, data_ in zip(["averages","marginales", "shapleys"], [averages, marginales, shapleys]):
+        for name, data_ in zip(["averages", "marginales", "shapleys"], [averages, marginales, shapleys]):
 
             matplotlib.pyplot.close()
             fig = plt.figure()
             plt.axis('equal')
             ax = fig.gca()
-            
+
             colormap = plt.cm.gist_ncar
-            colors = [colormap(i) for i in np.linspace(0, 0.9, len(self.scenario.algorithms))]
-    
+            colors = [colormap(i) for i in np.linspace(
+                0, 0.9, len(self.scenario.algorithms))]
+
             data_list = [data_[algo] for algo in algorithms]
-            
+
             # automatically detect precision for legend
             mean_v = np.abs(np.mean(data_list))
             prec = 2
@@ -306,19 +329,21 @@ class PerformanceAnalysis(object):
                     break
                 prec += 1
             print_str = "%s (%.{}f)".format(prec)
-            
+
             # rescale to fix pie plot issues
             sum_v = sum(data_.values())
             data_list = [v / sum_v for v in data_list]
-            
-            labels = [print_str %(algo, data_[algo]) for algo in algorithms]            
+
+            labels = [print_str % (algo, data_[algo]) for algo in algorithms]
             patches, texts = plt.pie(data_list, colors=colors)
-            plt.legend(patches, labels, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-     
+            plt.legend(
+                patches, labels, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+
             plt.tight_layout()
-            
-            out_fn = os.path.join(self.output_dn, "contribution_%s_pie_plot.png" %(name))
-            
+
+            out_fn = os.path.join(
+                self.output_dn, "contribution_%s_pie_plot.png" % (name))
+
             plt.savefig(out_fn, facecolor='w', edgecolor='w',
                         orientation='portrait', papertype=None, format=None,
                         transparent=False, pad_inches=0.02, bbox_inches='tight')
@@ -343,7 +368,7 @@ class PerformanceAnalysis(object):
         '''
         marginales = {}
         all_vbs = self.__get_vbs(self.scenario.performance_data)
-        self.logger.info("VBS: %f" %(all_vbs))
+        self.logger.info("VBS: %f" % (all_vbs))
         for algorithm in self.scenario.algorithms:
             remaining_algos = list(
                 set(self.scenario.algorithms).difference([algorithm]))
@@ -399,7 +424,7 @@ class PerformanceAnalysis(object):
 
                 metricvalue = metric(ialgorithm, instance)
                 # normalised as fraction of instances
-                value = 1/float(m)*metricvalue
+                value = 1 / float(m) * metricvalue
                 #value = metricvalue
                 #print >> sys.stderr, 'Value of this rule : 1/%d * %.4f = %.4f' % (m,metricvalue,value)
 
@@ -431,9 +456,14 @@ class PerformanceAnalysis(object):
 
         return shapleys
 
-    def get_cdf_plots(self):
+    def get_cdf_plots(self, plot_log_perf: bool=False):
         '''
             plot the cummulative distribution function of each algorithm
+
+            Arguments
+            ---------
+            plot_log_perf: bool
+                plot perf on log scale
 
             Returns
             -------
@@ -473,7 +503,7 @@ class PerformanceAnalysis(object):
         ax1.set_xlabel(self.scenario.performance_measure[0])
         ax1.set_ylabel("P(x<X)")
         ax1.set_xlim([min_val, max_val])
-        if self.scenario.performance_type[0] == "runtime":
+        if self.scenario.performance_type[0] == "runtime" or plot_log_perf:
             ax1.set_xscale('log')
 
         #ax1.legend(loc='lower right')
@@ -526,9 +556,14 @@ class PerformanceAnalysis(object):
 
         return out_fn
 
-    def get_box_plots(self):
+    def get_box_plots(self, plot_log_perf: bool=False):
         '''
             compute violin plots (fancy box plots) for each algorithm
+            
+            Arguments
+            ---------
+            plot_log_perf: bool
+                plot perf on log scale
         '''
         matplotlib.pyplot.close()
         self.logger.info("Plotting box plots........")
@@ -548,7 +583,7 @@ class PerformanceAnalysis(object):
         y_label = "%s" % (self.scenario.performance_type[0])
         ax.set_ylabel(y_label)
 
-        if self.scenario.performance_type[0] == "runtime":
+        if self.scenario.performance_type[0] == "runtime" or plot_log_perf:
             ax.set_yscale('log')
 
         plt.setp(ax, xticks=[y + 1 for y in range(len(all_data))],
@@ -607,57 +642,65 @@ class PerformanceAnalysis(object):
         plt.savefig(out_fn, bbox_extra_artists=(lgd,), bbox_inches='tight')
 
         return out_fn
-    
+
     def get_cd_diagram(self):
         '''
             computes critical distance plots with the orange package
         '''
         import Orange
 
-        MAX_ALGOS = 20 # orange allows unfortunately only 20 algorithms for cd diagrams
+        # orange allows unfortunately only 20 algorithms for cd diagrams
+        MAX_ALGOS = 20
 
         if self.scenario.maximize[0] == True:
             # marginal contribution code assumes: smaller is better
-            self.scenario.performance_data = self.scenario.performance_data * -1
+            self.scenario.performance_data = self.scenario.performance_data * - \
+                1
 
         matplotlib.pyplot.close()
         self.logger.info("Plotting critical distance plots........")
-        names = list(self.scenario.performance_data.columns)     # labels of each technique
+        # labels of each technique
+        names = list(self.scenario.performance_data.columns)
         if len(names) > MAX_ALGOS:
             # sort algorithms by their average ranks
-            names = list(self.scenario.performance_data.rank(axis=1).mean(axis=0).sort_values().index)
+            names = list(self.scenario.performance_data.rank(
+                axis=1).mean(axis=0).sort_values().index)
             names = names[:MAX_ALGOS]
             performance_data = self.scenario.performance_data[names]
         else:
             performance_data = self.scenario.performance_data
-        
-        avranks = performance_data.rank(axis=1).mean(axis=0).values # average ranking of each technique
-        number_of_datasets = len(self.scenario.instances) # number of datasets
-        
-        cd = Orange.evaluation.compute_CD(avranks, number_of_datasets, alpha="0.05", test='nemenyi')
+
+        avranks = performance_data.rank(axis=1).mean(
+            axis=0).values  # average ranking of each technique
+        number_of_datasets = len(self.scenario.instances)  # number of datasets
+
+        cd = Orange.evaluation.compute_CD(
+            avranks, number_of_datasets, alpha="0.05", test='nemenyi')
         out_fn = os.path.join(self.output_dn, "cd_diagram.png")
-        Orange.evaluation.graph_ranks(avranks, names, cd=cd, width=12, textspace=2)
+        Orange.evaluation.graph_ranks(
+            avranks, names, cd=cd, width=12, textspace=2)
         plt.savefig(out_fn)
-        
+
         if self.scenario.maximize[0] == True:
             # marginal contribution code assumes: smaller is better
-            self.scenario.performance_data = self.scenario.performance_data * -1
-        
+            self.scenario.performance_data = self.scenario.performance_data * - \
+                1
+
         return out_fn
-    
+
     def get_footprints(self, eps=0.05):
         '''
             computes the algorithm footprint in feature space,
             i.e. all instances that can be solved within eps% of the VBS performance
-            
+
             Arguments
             ---------
             eps: float
                 eps% threshold to VBS performance
         '''
-        
+
         self.logger.info("Plotting footprints........")
-        
+
         self.scenario.feature_data = self.scenario.feature_data.fillna(
             self.scenario.feature_data.mean())
 
@@ -669,59 +712,65 @@ class PerformanceAnalysis(object):
         features = ss.fit_transform(features)
 
         # feature reduction: pca
-        #TODO: use feature selection first to use only important features
+        # TODO: use feature selection first to use only important features
         pca = PCA(n_components=2)
         features = pca.fit_transform(features)
-        features = pd.DataFrame(data=features, index=self.scenario.feature_data.index)
-        
+        features = pd.DataFrame(
+            data=features, index=self.scenario.feature_data.index)
+
         performance_data = self.scenario.performance_data
-        
+
         if self.scenario.maximize[0] == False:
             vbs_perf = performance_data.min(axis=1)
         else:
             vbs_perf = performance_data.max(axis=1)
-        
+
         algorithms = self.scenario.algorithms
-        
+
         out_fns = []
         for algo in algorithms:
-            out_fn = os.path.join(self.output_dn, "footprint_%s" %(algo.replace("/","_")))
-            
+            out_fn = os.path.join(
+                self.output_dn, "footprint_%s" % (algo.replace("/", "_")))
+
             algo_perf = performance_data[algo]
             if self.scenario.maximize[0] == False:
-                vbs_perfs = vbs_perf * (1+eps)
-                footprint = (algo_perf <= vbs_perfs) & (self.scenario.runstatus_data[algo] == "ok")
+                vbs_perfs = vbs_perf * (1 + eps)
+                footprint = (algo_perf <= vbs_perfs) & (
+                    self.scenario.runstatus_data[algo] == "ok")
             else:
-                vbs_perfs = vbs_perf * (1-eps)
-                footprint = (algo_perf >= vbs_perfs) & (self.scenario.runstatus_data[algo] == "ok")
-            
+                vbs_perfs = vbs_perf * (1 - eps)
+                footprint = (algo_perf >= vbs_perfs) & (
+                    self.scenario.runstatus_data[algo] == "ok")
+
             matplotlib.pyplot.close()
             fig = plt.figure()
-            
-            non_insts = footprint[footprint==False].index.tolist()
+
+            non_insts = footprint[footprint == False].index.tolist()
             feature_not = features.loc[non_insts]
-            scatter = plt.scatter(feature_not[0], feature_not[1], c="black")
-            
+            scatter = plt.scatter(
+                feature_not[0], feature_not[1], c="black", linewidths=0, alpha=0.5)
+
             tooltip = mpld3.plugins.PointHTMLTooltip(scatter, non_insts,
-                                                 voffset=10, hoffset=10)
+                                                     voffset=10, hoffset=10)
             mpld3.plugins.connect(fig, tooltip)
-            
-            ok_insts = footprint[footprint==True].index.tolist()
+
+            ok_insts = footprint[footprint == True].index.tolist()
             features_ok = features.loc[ok_insts]
-            scatter = plt.scatter(features_ok[0], features_ok[1], c="red")
-            
+            scatter = plt.scatter(
+                features_ok[0], features_ok[1], c="red", linewidths=0, alpha=0.5)
+
             tooltip = mpld3.plugins.PointHTMLTooltip(scatter, ok_insts,
-                                                 voffset=10, hoffset=10)
+                                                     voffset=10, hoffset=10)
             mpld3.plugins.connect(fig, tooltip)
-            
-            mpld3.save_html(fig,out_fn+".html")
+
+            mpld3.save_html(fig, out_fn + ".html")
             plt.tight_layout()
-            plt.savefig(out_fn+".png", format="png")
-            
-            out_fns.append([algo, out_fn+".html", out_fn+".png"])
-            
+            plt.savefig(out_fn + ".png", format="png")
+
+            out_fns.append([algo, out_fn + ".html", out_fn + ".png"])
+
         return out_fns
-    
+
     def instance_hardness(self, eps=0.01):
         '''
             plot instances in 2d PCA feature space 
@@ -729,7 +778,7 @@ class PerformanceAnalysis(object):
         '''
         matplotlib.pyplot.close()
         self.logger.info("Plotting Instance hardness........")
-        
+
         self.scenario.feature_data = self.scenario.feature_data.fillna(
             self.scenario.feature_data.mean())
 
@@ -742,64 +791,66 @@ class PerformanceAnalysis(object):
         features = ss.fit_transform(features)
 
         # feature reduction: pca
-        #TODO: use feature selection first to use only important features
+        # TODO: use feature selection first to use only important features
         pca = PCA(n_components=2)
         features = pca.fit_transform(features)
-        features = pd.DataFrame(data=features, index=self.scenario.feature_data.index)
-        
+        features = pd.DataFrame(
+            data=features, index=self.scenario.feature_data.index)
+
         performance_data = self.scenario.performance_data
-        
+
         if self.scenario.maximize[0] == False:
             vbs_perf = performance_data.min(axis=1)
         else:
             vbs_perf = performance_data.max(axis=1)
-        
+
         algorithms = self.scenario.algorithms
-        
+
         hardness_insts = pd.DataFrame(data=np.zeros((len(insts))), index=insts)
-        
+
         for algo in algorithms:
-            out_fn = os.path.join(self.output_dn, "footprint_%s.html" %(algo))
-            
+            out_fn = os.path.join(self.output_dn, "footprint_%s.html" % (algo))
+
             algo_perf = performance_data[algo]
             if self.scenario.maximize[0] == False:
-                vbs_perfs = vbs_perf * (1+eps)
-                footprint = (algo_perf <= vbs_perfs) & (self.scenario.runstatus_data[algo] == "ok")
+                vbs_perfs = vbs_perf * (1 + eps)
+                footprint = (algo_perf <= vbs_perfs) & (
+                    self.scenario.runstatus_data[algo] == "ok")
             else:
-                vbs_perfs = vbs_perf * (1-eps)
-                footprint = (algo_perf >= vbs_perfs) & (self.scenario.runstatus_data[algo] == "ok")
-            
+                vbs_perfs = vbs_perf * (1 - eps)
+                footprint = (algo_perf >= vbs_perfs) & (
+                    self.scenario.runstatus_data[algo] == "ok")
+
             hardness_insts.loc[footprint[footprint].index.tolist()] += 1
-        
+
         fig = plt.figure()
-        
+
         x = []
         y = []
         c = []
         insts_all = []
-        for i in range(len(algorithms)+1):    
-            insts = hardness_insts[(hardness_insts==float(i)).values].index.tolist()
+        for i in range(len(algorithms) + 1):
+            insts = hardness_insts[
+                (hardness_insts == float(i)).values].index.tolist()
             f = features.loc[insts]
             x.extend(f[0])
             y.extend(f[1])
-            c.extend([i]*len(insts))
+            c.extend([i] * len(insts))
             insts_all.extend(insts)
-            
-        scatter = plt.scatter(x, y, c=c, vmin=1, vmax=len(algorithms), edgecolors="black", cmap=plt.cm.jet)
-        
+
+        scatter = plt.scatter(x, y, c=c, vmin=1, vmax=len(
+            algorithms), edgecolors="black", cmap=plt.cm.jet, linewidths=0, alpha=0.5)
+
         out_fn = os.path.join(self.output_dn, "instance_hardness")
-         
+
         tooltip = mpld3.plugins.PointHTMLTooltip(scatter, insts_all,
                                                  voffset=10, hoffset=10)
-        mpld3.plugins.connect(fig, tooltip)            
-         
-        
-        mpld3.save_html(fig,out_fn+".html") #mpld3 does not support legends
-        
+        mpld3.plugins.connect(fig, tooltip)
+
+        # mpld3 does not support legends
+        mpld3.save_html(fig, out_fn + ".html")
+
         plt.colorbar(scatter)
-        plt.savefig(out_fn+".png", bbox_inches='tight')
-        
-            
-        return out_fn+".html", out_fn+".png" 
-        
-        
+        plt.savefig(out_fn + ".png", bbox_inches='tight')
+
+        return out_fn + ".html", out_fn + ".png"

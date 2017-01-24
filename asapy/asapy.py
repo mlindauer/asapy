@@ -1,4 +1,3 @@
-import argparse
 import logging
 import sys
 import os
@@ -29,7 +28,8 @@ __email__ = "lindauer@cs.uni-freiburg.de"
 class ASAPy(object):
 
     def __init__(self,
-                 output_dn: str=".",):
+                 output_dn: str=".",
+                 plot_log_perf: bool=False):
         '''
         Constructor
 
@@ -42,6 +42,7 @@ class ASAPy(object):
 
         self.scenario = None
         self.output_dn = output_dn
+        self.plot_log_perf = plot_log_perf
         
         if not os.path.isdir(self.output_dn):
             os.mkdir(self.output_dn)
@@ -194,7 +195,7 @@ class ASAPy(object):
      
             # get box plot
             if config["Performance Analysis"].get("Box plot"):
-                box_plot = pa.get_box_plots()
+                box_plot = pa.get_box_plots(plot_log_perf=self.plot_log_perf)
                 data["Performance Analysis"]["Box plot"] = {"tooltip": "Box plots to show the performance distribution of each algorithm",
                                                         "figure": box_plot}
      
@@ -206,7 +207,7 @@ class ASAPy(object):
      
             # get cdf plot
             if config["Performance Analysis"].get("CDF plot"):
-                cdf_plot = pa.get_cdf_plots()
+                cdf_plot = pa.get_cdf_plots(plot_log_perf=self.plot_log_perf)
                 data["Performance Analysis"]["CDF plot"] = {"tooltip": "Cumulative Distribution function (CDF) plots. At each point x (e.g., running time cutoff), how many of the instances (in percentage) can be solved. Better algorithms have a higher curve for minimization problems.",
                                                         "figure": cdf_plot}
 
@@ -219,7 +220,7 @@ class ASAPy(object):
      
             # generate scatter plots
             if config["Performance Analysis"].get("Scatter plots"):
-                scatter_plots = pa.scatter_plots()
+                scatter_plots = pa.scatter_plots(plot_log_perf=self.plot_log_perf)
                 data["Performance Analysis"]["Scatter plots"] = OrderedDict({
                     "tooltip": "Scatter plot to compare the performance of two algorithms on all instances -- each dot represents one instance."})
                 scatter_plots  = sorted(scatter_plots, key=lambda x: x[0]+x[1])
