@@ -67,14 +67,16 @@ class ASAPy(object):
         Arguments
         ---------
         csv_data: namedtuple
-            namedtuple with the following fields: "perf_csv", "feat_csv", "obj", "cutoff", "maximize"
+            namedtuple with the following fields: "perf_csv", "feat_csv", "obj", "cutoff", "maximize", "cv_csv" 
+            "cv_csv" can be None
         '''
         self.scenario = ASlibScenario()
         self.scenario.read_from_csv(perf_fn=csv_data.perf_csv,
                                     feat_fn=csv_data.feat_csv,
                                     objective=csv_data.obj,
                                     runtime_cutoff=csv_data.cutoff,
-                                    maximize=csv_data.maximize)
+                                    maximize=csv_data.maximize,
+                                    cv_fn=csv_data.cv_csv)
 
     def get_default_config(self):
         '''
@@ -131,7 +133,8 @@ class ASAPy(object):
 
         return config
 
-    def main(self, config: dict, max_algos: int=20):
+    def main(self, config: dict, max_algos: int=20,
+             only_fold:int=None):
         '''
             main method
 
@@ -140,8 +143,15 @@ class ASAPy(object):
             config: dict
                 configuration that enables or disables plots
             max_algos: int
-                maximum number of algos to consider; if more are available, we take the n best algorithm on average performance
+                maximum number of algos to consider; 
+                if more are available, we take the n best algorithm on average performance
+            only_fold: int
+                use only the given <only_fold> cv-fold data for analyze
         '''
+        
+        if only_fold:
+            self.logger.info("Using only test data from %d cv-split" %(only_fold))
+            _, self.scenario = self.scenario.get_split(only_fold)
 
         n_prev_algos = None
         if self.scenario is None:
