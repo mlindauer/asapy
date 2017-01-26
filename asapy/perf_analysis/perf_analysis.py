@@ -56,6 +56,17 @@ class PerformanceAnalysis(object):
         '''
             use a greedy forward search wrt VBS performance
             to shrink the set of algorithms to max_algos
+            
+            Arguments
+            ---------
+            max_algos: int
+                maximal number of algorithms to be selected
+                
+            Returns
+            -------
+            typing.List[(str,float)] 
+                list of tuples (algorithm, performance)
+            
         '''
         performance_data = self.scenario.performance_data
 
@@ -63,32 +74,47 @@ class PerformanceAnalysis(object):
             performance_data *= -1
 
         bsa = performance_data.mean(axis=0).idxmin()
-        selected_algos = [bsa]
+        bsa_score = performance_data.mean(axis=0).min()
+        selected_algos = [[bsa,bsa_score]]
         remaining_algos = set(self.scenario.algorithms)
         remaining_algos.remove(bsa)
         for i in range(1, max_algos):
+            sels = [a[0] for a in selected_algos]
             best_algo = [
-                None, self.__get_vbs(performance_data=performance_data[selected_algos])]
+                None, self.__get_vbs(performance_data=performance_data[sels])]
             for algo in remaining_algos:
-                selected_algos.append(algo)
+                sels_ = sels[:]
+                sels_.append(algo)
                 vbs = self.__get_vbs(
-                    performance_data=performance_data[selected_algos])
-                selected_algos.remove(algo)
+                    performance_data=performance_data[sels_])
                 if vbs < best_algo[1]:
                     best_algo = [algo, vbs]
             if best_algo[0] is None:
                 break
-            selected_algos.append(best_algo[0])
+            selected_algos.append(best_algo)
             remaining_algos.remove(best_algo[0])
             self.logger.debug(best_algo)
 
-        self.logger.warning("We lost because of algorithm filtering %f of VBS estimate" % (
+        self.logger.warning("Because of algorithm filtering, we lost %f of VBS estimate." % (
             best_algo[1] - self.__get_vbs(performance_data=performance_data)))
 
         if self.scenario.maximize[0]:
             performance_data *= -1
 
         return selected_algos
+    
+    def get_greedy_portfolio_constr(self):
+        '''
+            using greedy forward selection wrt to VBS optimization,
+            iteratively build portfolio
+        '''
+        
+        algo_scores = self.reduce_algos(max_algos=len(self.scenario.algorithms))
+        algos = ["Adding %s" %(a[0]) for a in algo_scores]
+        scores = ["%.2f" %(a[1]) for a in algo_scores]
+        df = DataFrame(data=scores, index=algos, columns=["VBS score"])
+        
+        return df.to_html()
 
     def get_baselines(self):
         '''
