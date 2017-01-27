@@ -284,9 +284,14 @@ class PerformanceAnalysis(object):
             
         averages = self._get_average_perf()
 
+        #=======================================================================
+        # sorted_avg = sorted(averages.items(), key=lambda x: x[1], reverse=True)
+        # for algo, avg in sorted_avg:
+        #     print("%s,%.3f,%.3f,%.3f" %(algo, avg, marginales[algo], shapleys[algo]))
+        #=======================================================================
+        
         out_fns = []
         for name, data_ in zip(["averages","marginales", "shapleys"], [averages, marginales, shapleys]):
-
             matplotlib.pyplot.close()
             fig = plt.figure()
             plt.axis('equal')
