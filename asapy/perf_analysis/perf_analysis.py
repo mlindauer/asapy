@@ -111,7 +111,11 @@ class PerformanceAnalysis(object):
         
         algo_scores = self.reduce_algos(max_algos=len(self.scenario.algorithms))
         algos = ["Adding %s" %(a[0]) for a in algo_scores]
-        scores = ["%.2f" %(a[1]) for a in algo_scores]
+        if self.scenario.maximize[0]:
+            scores = ["%.2f" %(a[1]*-1) for a in algo_scores]
+        else:
+            scores = ["%.2f" %(a[1]) for a in algo_scores]
+        
         df = DataFrame(data=scores, index=algos, columns=["VBS score"])
         
         return df.to_html()
@@ -220,7 +224,13 @@ class PerformanceAnalysis(object):
         data = np.zeros((n_algos, n_algos)) + 1  # similarity
         for i in range(n_algos):
             for j in range(i + 1, n_algos):
-                rho, p = spearmanr(perf_data[:, i], perf_data[:, j])
+                y_i = np.array(perf_data[:, i],dtype=np.float64)
+                y_j = np.array(perf_data[:, j],dtype=np.float64)
+                if np.sum(perf_data[:, i]) == 0:
+                    y_i += np.random.rand(y_i.shape[0])*0.00001
+                if np.sum(perf_data[:, j]) == 0:
+                    y_j += np.random.rand(y_j.shape[0])*0.00001
+                rho, p = spearmanr(y_i, y_j)
                 data[i, j] = rho
                 data[j, i] = rho
 
@@ -520,6 +530,9 @@ class PerformanceAnalysis(object):
         else:
             max_val = self.scenario.performance_data.max().max()
             min_val = self.scenario.performance_data.min().min()
+            
+        if plot_log_perf: 
+            min_val = max(0.0005, min_val)
 
         for algorithm in self.scenario.algorithms:
             x, y = get_cdf_x_y(
