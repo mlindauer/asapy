@@ -4,59 +4,75 @@ import logging
 import sys
 import os
 import inspect
-cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+cmd_folder = os.path.realpath(
+    os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
 cmd_folder = os.path.realpath(os.path.join(cmd_folder, ".."))
 if cmd_folder not in sys.path:
-    sys.path.insert(0,cmd_folder)
+    sys.path.insert(0, cmd_folder)
 
 from collections import namedtuple
 import argparse
 
 from asapy.asapy import ASAPy
 
-parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 aslib = parser.add_argument_group("ASlib Format")
-aslib.add_argument("--scenario", default=None, help="directory to ASlib Scenario")
+aslib.add_argument(
+    "--scenario", default=None, help="directory to ASlib Scenario")
 
 csv = parser.add_argument_group("Reading from CSV Format")
 csv.add_argument("--performance_csv", default=None,
                  help="performance data in csv table (column: algorithm, row: instance, delimeter: ,)")
 csv.add_argument("--feature_csv", default=None,
                  help="instance features data in csv table (column: features, row: instance, delimeter: ,)")
+csv.add_argument("--cv_csv", default=None,
+                 help="cross validation splits in csv table (column: split ID, row: instance, delimeter: ,)")
 csv.add_argument("--objective", default="solution_quality", choices=[
                  "runtime", "solution_quality"], help="Are the objective values in the performance data runtimes or an arbitrary solution quality (or cost) value")
 csv.add_argument("--runtime_cutoff", default=None, type=float,
                  help="cutoff time for each algorithm run for the performance data")
-csv.add_argument("--maximize", default=False, action="store_true", help="Set this parameter to indicate maximization of the performance metric (default: minimization)")
+csv.add_argument("--maximize", default=False, action="store_true",
+                 help="Set this parameter to indicate maximization of the performance metric (default: minimization)")
+csv.add_argument("--plot_log_perf", default=False, action="store_true",
+                 help="Plot performance on a log scale (in some plots); default on some plots if running time is the used metric")
 
 optional = parser.add_argument_group("Optional Arguments")
 optional.add_argument("--output", default=".", help="output directory")
-optional.add_argument("--max_algos", default=20, type=int, help="maximal number of algorithms to analyze")
-optional.add_argument("--print_config", default=False, action="store_true", help="print config template and exit")
+optional.add_argument("--max_algos", default=20, type=int,
+                      help="maximal number of algorithms to analyze")
+optional.add_argument("--only_fold", default=None, type=int,
+                      help="only analyze given cv-fold")
+optional.add_argument("--print_config", default=False,
+                      action="store_true", help="print config template and exit")
 optional.add_argument("--config", default=None, help="load config file")
-optional.add_argument("--verbose", choices=["INFO", "DEBUG"], default="INFO", help="verbosity level")
+optional.add_argument(
+    "--verbose", choices=["INFO", "DEBUG"], default="INFO", help="verbosity level")
 
 args_ = parser.parse_args()
 
 logging.basicConfig(level=args_.verbose)
 
-asapy = ASAPy(output_dn=args_.output)
+asapy = ASAPy(output_dn=args_.output, plot_log_perf=args_.plot_log_perf)
 
 if args_.print_config:
-	asapy.print_config()
-	sys.exit(0)
+    asapy.print_config()
+    sys.exit(0)
 
 if args_.config:
-	config = asapy.load_config(args_.config)
+    config = asapy.load_config(args_.config)
 else:
-	config = asapy.get_default_config()
+    config = asapy.get_default_config()
 
 if args_.scenario:
-	asapy.read_scenario_ASlib(scenario_dn=args_.scenario)
-	
-elif args_.performance_csv:
-	CSV_Data = namedtuple("CSV_Data", ["perf_csv", "feat_csv", "obj", "cutoff", "maximize"])
-	csv_data = CSV_Data(args_.performance_csv, args_.feature_csv, args_.objective, args_.runtime_cutoff, args_.maximize)
-	asapy.read_scenario_CSV(csv_data)
+    asapy.read_scenario_ASlib(scenario_dn=args_.scenario)
 
-asapy.main(config, args_.max_algos)
+elif args_.performance_csv:
+    CSV_Data = namedtuple(
+        "CSV_Data", ["perf_csv", "feat_csv", "obj", "cutoff", "maximize", "cv_csv"])
+    csv_data = CSV_Data(args_.performance_csv, args_.feature_csv,
+                        args_.objective, args_.runtime_cutoff, args_.maximize,
+                        args_.cv_csv)
+    asapy.read_scenario_CSV(csv_data)
+
+asapy.main(config, args_.max_algos, args_.only_fold)

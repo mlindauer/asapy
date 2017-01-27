@@ -107,7 +107,7 @@ class FeatureAnalysis(object):
         data = np.zeros((n_features, n_features)) + 1  # similarity
         for i in range(n_features):
             for j in range(i + 1, n_features):
-                rho = corrcoef([feature_data[:, i], feature_data[:, j]])[0,1]
+                rho = corrcoef([feature_data[:, i], feature_data[:, j]])[0, 1]
                 if np.isnan(rho):  # is nan if one feature vec is constant
                     rho = 0
                 data[i, j] = rho
@@ -182,7 +182,8 @@ class FeatureAnalysis(object):
         config["rf:bootstrap"] = True
         pc.fit(scenario=self.scenario, config=config)
 
-        importances = [rf.model.feature_importances_ for rf in pc.classifiers]
+        importances = [
+            rf.model.feature_importances_ for rf in pc.classifiers if np.isnan(rf.model.feature_importances_).sum() == 0]
         median_importance = np.median(importances, axis=0)
         q25 = np.percentile(importances, 0.25, axis=0)
         q75 = np.percentile(importances, 0.75, axis=0)
@@ -201,7 +202,7 @@ class FeatureAnalysis(object):
         plt.figure()
         # only the first 10 most important features
         plt.bar(range(N_FEAT), median_importance,
-                color="r", yerr=[q25,q75], align="center")
+                color="r", yerr=[q25, q75], align="center")
 
         plt.xlim([-1, N_FEAT])
         plt.xticks(range(N_FEAT), feature_names, rotation=40, ha='right')
