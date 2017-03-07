@@ -797,7 +797,7 @@ class PerformanceAnalysis(object):
             non_insts = footprint[footprint == False].index.tolist()
             feature_not = features.loc[non_insts]
             scatter = plt.scatter(
-                feature_not[0], feature_not[1], c="black", linewidths=0, alpha=0.5)
+                feature_not[0], feature_not[1], c="black", linewidths=0, alpha=0.5, s=60)
 
             tooltip = mpld3.plugins.PointHTMLTooltip(scatter, non_insts,
                                                      voffset=10, hoffset=10)
@@ -806,7 +806,7 @@ class PerformanceAnalysis(object):
             ok_insts = footprint[footprint == True].index.tolist()
             features_ok = features.loc[ok_insts]
             scatter = plt.scatter(
-                features_ok[0], features_ok[1], c="red", linewidths=0, alpha=0.5)
+                features_ok[0], features_ok[1], c="red", linewidths=0, alpha=0.5, s=60)
 
             tooltip = mpld3.plugins.PointHTMLTooltip(scatter, ok_insts,
                                                      voffset=10, hoffset=10)
@@ -820,7 +820,7 @@ class PerformanceAnalysis(object):
 
         return out_fns
 
-    def instance_hardness(self, eps=0.01):
+    def instance_hardness(self, eps=0.05):
         '''
             plot instances in 2d PCA feature space 
             and color them according to number of algorithms that are at most eps% away from oralce score
@@ -888,7 +888,7 @@ class PerformanceAnalysis(object):
             insts_all.extend(insts)
 
         scatter = plt.scatter(x, y, c=c, vmin=1, vmax=len(
-            algorithms), edgecolors="black", cmap=plt.cm.jet, linewidths=0, alpha=0.5)
+            algorithms), edgecolors="black", cmap=plt.cm.jet, linewidths=0, alpha=0.5, s=40)
 
         out_fn = os.path.join(self.output_dn, "instance_hardness")
 
