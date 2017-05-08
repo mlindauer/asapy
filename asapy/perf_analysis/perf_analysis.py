@@ -13,7 +13,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
 import matplotlib
-from rope.refactor.multiproject import perform
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import tight_layout, figure, subplot, savefig, show, setp
@@ -130,6 +129,7 @@ class PerformanceAnalysis(object):
                 html table with entries for bsa and vbs
         '''
         performance_data = self.scenario.performance_data
+        table_data = []
 
         if self.scenario.maximize[0]:
             maxis = performance_data.max(axis=1)
@@ -143,11 +143,21 @@ class PerformanceAnalysis(object):
             best_indx = algo_perfs.idxmin()
             bsa = algo_perfs[best_indx]
         unsolvable = int(np.sum(np.sum(self.scenario.runstatus_data.values == "ok", axis=1) == 0))
+        
+        table_data.append(["Virtual Best Algorithm", vbs_score])
+        table_data.append(["Best Single Algorithm (%s)" % (best_indx), bsa])
+        table_data.append(["Instances not solved by any algorithm", unsolvable])
 
-        df = DataFrame(data=[[vbs_score], [bsa], [unsolvable]], index=[
-                       "Virtual Best Algorithm", 
-                       "Best Single Algorithm (%s)" % (best_indx),
-                       "Instances not solved by any algorithm"])
+        if self.scenario.performance_type[0] == "runtime":
+            n_inst = len(self.scenario.instances)
+            vbs_clean = (vbs_score*n_inst - 10*self.scenario.algorithm_cutoff_time*unsolvable) / (n_inst - unsolvable)
+            bsa_clean = (bsa*n_inst - 10*self.scenario.algorithm_cutoff_time*unsolvable) / (n_inst - unsolvable)
+            table_data.append(["VBS (w/o unsolved instances)", vbs_clean])
+            table_data.append(["Best Single Algorithm (w/o unsolved instances)", bsa_clean])
+
+        df = pd.DataFrame(data=list(map(lambda x: x[1], table_data)), index=list(
+            map(lambda x: x[0], table_data)), columns=[""])
+
         return df.to_html(header=False)
 
     def scatter_plots(self, plot_log_perf: bool=False):
