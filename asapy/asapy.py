@@ -352,6 +352,11 @@ class ASAPy(object):
         data = []
 
         data.append(
+            ("Number of instances", len(self.scenario.instances)))
+        data.append(
+            ("Number of algorithms", len(self.scenario.algorithms)))
+
+        data.append(
             ("Performance measure", self.scenario.performance_measure[0]))
         data.append(("Performance type", self.scenario.performance_type[0]))
         data.append(("Maximize?", str(self.scenario.maximize[0])))
