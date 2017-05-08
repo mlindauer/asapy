@@ -142,9 +142,12 @@ class PerformanceAnalysis(object):
             algo_perfs = performance_data.mean(axis=0)
             best_indx = algo_perfs.idxmin()
             bsa = algo_perfs[best_indx]
+        unsolvable = int(np.sum(np.sum(self.scenario.runstatus_data.values == "ok", axis=1) == 0))
 
-        df = DataFrame(data=[[vbs_score], [bsa]], index=[
-                       "Virtual Best Algorithm", "Best Single Algorithm (%s)" % (best_indx)])
+        df = DataFrame(data=[[vbs_score], [bsa], [unsolvable]], index=[
+                       "Virtual Best Algorithm", 
+                       "Best Single Algorithm (%s)" % (best_indx),
+                       "Instances not solved by any algorithm"])
         return df.to_html(header=False)
 
     def scatter_plots(self, plot_log_perf: bool=False):
