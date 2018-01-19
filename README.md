@@ -29,6 +29,12 @@ If you do not use Anaconda or a virtual environment, you may want to add the opt
 
 If the installation of `autofolio` fails, please try to install `autofolio` first and then `asapy`.
 
+#### Anaconda 
+
+If you use Anaconda as your Python environment, you have to install the following three packages:
+
+```conda install gxx_linux-64 gcc_linux-64 swig```
+
 ## USAGE
 
 ### Input Formats 
