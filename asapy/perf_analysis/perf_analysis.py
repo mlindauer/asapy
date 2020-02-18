@@ -5,7 +5,7 @@ import numpy as np
 
 from scipy.stats import spearmanr
 from scipy.cluster.hierarchy import linkage, dendrogram
-from scipy.misc import comb
+from scipy.special import comb
 
 from pandas import DataFrame
 
@@ -825,7 +825,7 @@ class PerformanceAnalysis(object):
                                                      voffset=10, hoffset=10)
             mpld3.plugins.connect(fig, tooltip)
 
-            mpld3.save_html(fig, out_fn + ".html")
+            #mpld3.save_html(fig, out_fn + ".html")
             plt.tight_layout()
             plt.savefig(out_fn + ".png", format="png")
 
@@ -910,7 +910,7 @@ class PerformanceAnalysis(object):
         mpld3.plugins.connect(fig, tooltip)
 
         # mpld3 does not support legends
-        mpld3.save_html(fig, out_fn + ".html")
+        #mpld3.save_html(fig, out_fn + ".html")
 
         plt.colorbar(scatter)
         plt.savefig(out_fn+".png", bbox_inches='tight')

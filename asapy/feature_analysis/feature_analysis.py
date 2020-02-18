@@ -5,7 +5,7 @@ import numpy as np
 from numpy import corrcoef
 
 from scipy.cluster.hierarchy import linkage
-from scipy.misc import comb
+from scipy.special import comb
 
 from pandas import DataFrame
 
@@ -15,7 +15,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
 import matplotlib
-from sklearn.tree.tests.test_tree import y_random
+#from sklearn.tree.tests.test_tree import y_random
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
